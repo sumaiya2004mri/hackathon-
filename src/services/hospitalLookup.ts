@@ -1,8 +1,17 @@
-import type { HospitalResult } from '../types';
+import { HospitalResult } from '../types';
 
-const OVERPASS_ENDPOINT = 'https://overpass-api.de/api/interpreter';
+// Multiple public Overpass endpoints as fallbacks.
+// NOTE: each must point at the actual interpreter route, not the bare domain.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.openstreetmap.ru/api/interpreter',
+];
 
-function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+const QUERY_TIMEOUT_SECONDS = 15;
+const FETCH_TIMEOUT_MS = (QUERY_TIMEOUT_SECONDS + 5) * 1000; // give the server's own timeout room to fire first
+
+function haversineKM(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = ((lat2 - lat1) * Math.PI) / 180;
   const dLon = ((lon2 - lon1) * Math.PI) / 180;
@@ -12,48 +21,85 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-export async function findNearbyHospitals(lat: number, lon: number, radiusMeters = 8000): Promise<HospitalResult[]> {
-  const query = `
-    [out:json][timeout:15];
+export async function findNearbyHospitals(
+  lat: number,
+  lon: number,
+  radiusMeters = 8000
+): Promise<HospitalResult[]> {
+  const query = `[out:json][timeout:${QUERY_TIMEOUT_SECONDS}];
     (
       node["amenity"="hospital"](around:${radiusMeters},${lat},${lon});
       way["amenity"="hospital"](around:${radiusMeters},${lat},${lon});
       node["amenity"="clinic"](around:${radiusMeters},${lat},${lon});
     );
-    out center 20;
-  `;
+    out center 20;`;
 
-  try {
-    const res = await fetch(OVERPASS_ENDPOINT, {
-      method: 'POST',
-      body: query,
-      headers: { 'Content-Type': 'text/plain' },
-    });
-    if (!res.ok) throw new Error(`Overpass error ${res.status}`);
-    const data = await res.json();
+  const radiusKM = radiusMeters / 1000;
+  let lastError: unknown = null;
 
-    const results: HospitalResult[] = (data.elements ?? [])
-      .map((el: any) => {
-        const elLat = el.lat ?? el.center?.lat;
-        const elLon = el.lon ?? el.center?.lon;
-        if (elLat == null || elLon == null) return null;
-        return {
-          id: String(el.id),
-          name: el.tags?.name ?? 'Unnamed facility',
-          lat: elLat,
-          lon: elLon,
-          distanceKm: Math.round(haversineKm(lat, lon, elLat, elLon) * 10) / 10,
-          phone: el.tags?.phone ?? el.tags?.['contact:phone'],
-          type: el.tags?.amenity === 'hospital' ? 'hospital' : 'clinic',
-        } as HospitalResult;
-      })
-      .filter(Boolean)
-      .sort((a: HospitalResult, b: HospitalResult) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+  // Loop through available servers if one fails or times out
+  for (const endpoint of OVERPASS_ENDPOINTS) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-    return results;
-  } catch (err) {
-    // Network unavailable / Overpass rate-limited — return empty and let the
-    // UI fall back to the static district emergency-contacts list.
-    return [];
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        body: query,
+        headers: { 'Content-Type': 'text/plain' },
+        signal: controller.signal,
+      });
+
+      if (!res.ok) throw new Error(`Server returned status ${res.status}`);
+
+      const data = await res.json();
+      if (!data || !Array.isArray(data.elements)) {
+        throw new Error('Malformed response: missing elements array');
+      }
+
+      const results: HospitalResult[] = data.elements
+        .map((el: any) => {
+          const hLat = el.lat ?? el.center?.lat ?? null;
+          const hLon = el.lon ?? el.center?.lon ?? null;
+
+          // Skip anything without usable coordinates rather than
+          // silently falling back to the search origin.
+          if (hLat == null || hLon == null) return null;
+
+          const housenumber = el.tags?.['addr:housenumber'];
+          const street = el.tags?.['addr:street'];
+          const address = street ? `${housenumber ? housenumber + ' ' : ''}${street}` : undefined;
+
+          return {
+            id: el.id,
+            name: el.tags?.name || el.tags?.['name:en'] || 'Unknown Medical Center',
+            lat: hLat,
+            lon: hLon,
+            distance: haversineKM(lat, lon, hLat, hLon),
+            type: el.tags?.amenity === 'clinic' ? 'clinic' : 'hospital',
+            address,
+          } as HospitalResult;
+        })
+        .filter((r: HospitalResult | null): r is HospitalResult => r !== null)
+        // Overpass' `around` filter is exact for nodes, but a way/relation's
+        // computed center can fall slightly outside the requested radius.
+        .filter((r: HospitalResult) => r.distance <= radiusKM * 1.05)
+        .sort((a: HospitalResult, b: HospitalResult) => a.distance - b.distance);
+
+      return results;
+    } catch (error) {
+      lastError = error;
+      console.warn(`Endpoint ${endpoint} failed or timed out. Trying next fallback...`, error);
+      // Continue automatically to the next server url in the array
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
+
+  // If the loop finishes and all servers fail
+  throw new Error(
+    `All public medical map registries are currently overloaded or timed out. Please try again shortly.${
+      lastError instanceof Error ? ` (last error: ${lastError.message})` : ''
+    }`
+  );
 }

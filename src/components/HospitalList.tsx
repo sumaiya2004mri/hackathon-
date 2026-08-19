@@ -1,81 +1,66 @@
-import { useEffect, useState } from 'react';
-import type { HospitalResult } from '../types';
-import { useGeolocation } from '../hooks/useGeolocation';
-import { findNearbyHospitals } from '../services/hospitalLookup';
-import { getContactsForDistrict } from '../services/emergencyContacts';
+import { useState } from 'react';
+import { findNearbyHospitals } from './findNearbyHospitals'; // 1. name must match the actual export
+import { HospitalResult } from '../types';
 
-export default function HospitalList({ district, onSelect }: { district?: string; onSelect?: (h: HospitalResult) => void }) {
-  const { coords, status } = useGeolocation();
-  const [hospitals, setHospitals] = useState<HospitalResult[]>([]);
+export function useHospitalSearch() {
+  const [hospitals, setHospitals] = useState<HospitalResult[]>([]); // 2. typed, was implicit any[]
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    if (!coords) return;
+  const handleHospitalSearch = async (lat: number, lon: number) => {
     setLoading(true);
-    findNearbyHospitals(coords.lat, coords.lon).then((res) => {
-      setHospitals(res);
-      setLoading(false);
-    });
-  }, [coords]);
+    setErrorMessage(''); // Clear old errors
 
-  const contacts = getContactsForDistrict(district);
+    try {
+      const results = await findNearbyHospitals(lat, lon);
+      setHospitals(results);
+
+      if (results.length === 0) {
+        setErrorMessage('No hospitals found within your immediate radius.');
+      }
+    } catch (error: unknown) {
+      // 3. narrow unknown instead of trusting `any`
+      const message =
+        error instanceof Error ? error.message : 'Network timeout. Map services are currently unavailable.';
+      setErrorMessage(message);
+      setHospitals([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { hospitals, loading, errorMessage, handleHospitalSearch };
+}
+
+export function HospitalSearchPanel({ lat, lon }: { lat: number; lon: number }) {
+  const { hospitals, loading, errorMessage, handleHospitalSearch } = useHospitalSearch();
 
   return (
-    <div className="space-y-4">
-      {coords?.isMock && (
-        <p className="text-xs text-clinical-muted">
-          Location permission unavailable — showing results near a default location. Enable location for accurate results.
-        </p>
+    <div>
+      <button onClick={() => handleHospitalSearch(lat, lon)} disabled={loading}>
+        {loading ? 'Searching…' : 'Find nearby hospitals'}
+      </button>
+
+      {loading && <p role="status">Searching medical registries...</p>}
+
+      {errorMessage && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-3 rounded-md my-2" role="alert">
+          ⚠️ {errorMessage}
+        </div>
       )}
-      {loading && <p className="text-sm text-clinical-muted">Searching OpenStreetMap for nearby facilities…</p>}
-      {!loading && hospitals.length > 0 && (
-        <ul className="space-y-2">
-          {hospitals.slice(0, 8).map((h, i) => (
-            <li 
-              key={h.id} 
-              className="card p-3 flex items-center justify-between gap-3 stagger-item card-interactive"
-              style={{ animationDelay: `${i * 45}ms` }}
-            >
-              <div>
-                <p className="font-semibold text-clinical-text">{h.name}</p>
-                <p className="text-xs text-clinical-muted">{h.type === 'hospital' ? 'Hospital' : 'Clinic'} · {h.distanceKm} km away</p>
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <a
-                  className="text-xs px-3 py-1.5 rounded-lg bg-clinical-accent/10 text-clinical-text border border-clinical-border transition-all hover:bg-clinical-accent/25"
-                  href={`https://www.openstreetmap.org/directions?to=${h.lat},${h.lon}`}
-                  target="_blank" rel="noreferrer"
-                >
-                  Directions
-                </a>
-                {onSelect && (
-                  <button 
-                    onClick={() => onSelect(h)} 
-                    className="text-xs px-3 py-1.5 rounded-lg bg-clinical-panel2 border border-clinical-border transition-all hover:bg-clinical-panel hover:text-clinical-text"
-                  >
-                    Select
-                  </button>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-      {!loading && hospitals.length === 0 && (
-        <p className="text-sm text-clinical-muted">No live results found nearby — use these emergency numbers instead:</p>
-      )}
-      <div className="flex flex-wrap gap-2">
-        {contacts.map((c, i) => (
-          <a 
-            key={c.label} 
-            href={`tel:${c.number}`} 
-            className="text-xs px-3 py-1.5 rounded-lg bg-clinical-panel2 border border-clinical-border hover:border-clinical-accent hover:text-clinical-text transition-all stagger-item"
-            style={{ animationDelay: `${i * 35}ms` }}
-          >
-            {c.label}: <span className="font-mono">{c.number}</span>
-          </a>
-        ))}
-      </div>
+
+      {hospitals.map((hospital) => (
+        // 4. hospital.name, not hospital.tags.name — HospitalResult is a flat
+        // object (see findNearbyHospitals.ts), it has no nested `tags` field.
+        // The fallback name is already applied when the results are built,
+        // but a defensive `||` is kept here in case that ever changes.
+        <div key={hospital.id}>
+          {hospital.name || 'Unnamed Medical Center'}
+          {typeof hospital.distance === 'number' && (
+            <span> — {hospital.distance.toFixed(1)} km</span>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
