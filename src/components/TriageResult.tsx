@@ -21,20 +21,20 @@ export default function TriageResult({ session, module }: { session: TriageSessi
           <span className={`w-2.5 h-2.5 rounded-full bg-severity-${sev}`} />
           <span className="font-display font-semibold text-lg">{SEVERITY_LABEL[sev]}</span>
         </div>
-        <p className="text-sm mt-2">{session.recommendation}</p>
+        <p className="text-sm mt-2 text-ink">{session.recommendation}</p>
         <div className="flex items-center gap-3 mt-3">
           <VoiceReadout text={`${SEVERITY_LABEL[sev]}. ${session.recommendation}`} />
-          <span className="text-xs text-clinical-muted">
+          <span className="text-xs text-ink-soft">
             Assessed via {session.aiPass ? 'local rules + AI review' : 'local rules only'}
           </span>
         </div>
       </div>
 
       {session.aiPass && (
-        <details className="card p-3 text-xs text-clinical-muted">
-          <summary className="cursor-pointer text-clinical-text">Why this assessment (local + AI reasoning)</summary>
-          <p className="mt-2"><strong className="text-clinical-text">Local pass:</strong> {session.localPass.rationale}</p>
-          <p className="mt-1"><strong className="text-clinical-text">AI pass:</strong> {session.aiPass.rationale}</p>
+        <details className="card p-3 text-xs text-ink-muted">
+          <summary className="press cursor-pointer text-ink">Why this assessment (local + AI reasoning)</summary>
+          <p className="mt-2"><strong className="text-ink">Local pass:</strong> {session.localPass.rationale}</p>
+          <p className="mt-1"><strong className="text-ink">AI pass:</strong> {session.aiPass.rationale}</p>
         </details>
       )}
 
