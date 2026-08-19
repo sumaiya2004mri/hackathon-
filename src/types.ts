@@ -12,6 +12,11 @@ export type SeverityLevel =
   | 'MONITOR'     // ESI 4 equivalent — watch, log, revisit if it changes
   | 'NORMAL';     // ESI 5 equivalent / expected variation
 
+export interface EmergencyContact {
+  phone: string;
+  relationship: string; // e.g. 'Spouse' | 'Parent' | 'Sibling' | 'Friend' | 'Guardian' | 'Other'
+}
+
 export interface User {
   id: string;
   isGuest: boolean;
@@ -19,6 +24,7 @@ export interface User {
   age?: number;
   district?: string;        // Bangladesh district, drives localized emergency numbers
   pregnancyStatus?: 'not_pregnant' | 'pregnant' | 'postpartum' | 'unspecified';
+  emergencyContact?: EmergencyContact;
   medicalHistory?: {
     allergies: string[];
     chronicConditions: string[];
@@ -43,7 +49,6 @@ export interface SymptomEntry {
   module: ModuleKind;
   freeText: string;
   selectedSymptomKeys: string[];   // canonical keys matched by local rule engine
-  imageAttachmentUrl?: string;     // for Gemini vision analysis
   createdAt: string;
 }
 
