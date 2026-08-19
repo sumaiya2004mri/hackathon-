@@ -38,12 +38,14 @@ export default function TriageResult({ session, module }: { session: TriageSessi
         </details>
       )}
 
-      {session.routedToEmergencyFlow && (
-        <div className="card p-4 border border-severity-EMERGENCY/40">
-          <h3 className="font-medium text-severity-EMERGENCY mb-2">Nearest emergency care</h3>
-          <HospitalList district={user.district} />
-        </div>
-      )}
+      {/* Hospital location & interactive map shown regardless of severity level */}
+      <div className="card p-4 border border-clinical-border">
+        <h3 className="font-medium text-clinical-text mb-3 flex items-center gap-2">
+          <span>🏥</span>
+          <span>Nearest Medical Care & Facilities</span>
+        </h3>
+        <HospitalList district={user.district} />
+      </div>
     </div>
   );
 }

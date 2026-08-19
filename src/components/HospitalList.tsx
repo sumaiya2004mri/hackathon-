@@ -10,7 +10,7 @@ interface HospitalListProps {
 }
 
 export default function HospitalList({ district, onSelect }: HospitalListProps) {
-  const { coords } = useGeolocation();
+  const { coords } = useGeolocation(district);
   const [hospitals, setHospitals] = useState<HospitalResult[]>([]);
   const [selectedHospital, setSelectedHospital] = useState<HospitalResult | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,9 +24,15 @@ export default function HospitalList({ district, onSelect }: HospitalListProps) 
     findNearbyHospitals(coords.lat, coords.lon)
       .then((res) => {
         if (isMounted) {
-          setHospitals(res);
-          if (res.length > 0) {
-            setSelectedHospital(res[0]);
+          // Sort strictly by distance to user's active location
+          const sorted = [...res].sort((a, b) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
+          // Filter to local nearby facilities (within 60km) unless empty
+          const nearbyOnly = sorted.filter((h) => (h.distanceKm ?? 0) <= 60);
+          const finalResults = nearbyOnly.length > 0 ? nearbyOnly : sorted.slice(0, 4);
+
+          setHospitals(finalResults);
+          if (finalResults.length > 0) {
+            setSelectedHospital(finalResults[0]);
           }
           setLoading(false);
         }
@@ -54,7 +60,7 @@ export default function HospitalList({ district, onSelect }: HospitalListProps) 
     <div className="space-y-4">
       {coords?.isMock && (
         <p className="text-xs text-clinical-muted">
-          Location permission unavailable — showing emergency facilities near default location (Dhaka).
+          Showing emergency care facilities near {district || 'your selected location'}. Enable location permissions for exact live coordinates.
         </p>
       )}
 
@@ -71,7 +77,7 @@ export default function HospitalList({ district, onSelect }: HospitalListProps) 
               <h4 className="font-semibold text-clinical-text text-base">{activeHospital.name}</h4>
               <p className="text-xs text-clinical-muted">
                 {activeHospital.type === 'hospital' ? 'Hospital' : activeHospital.type === 'medical_college' ? 'Medical College' : 'Clinic'}
-                {activeHospital.distanceKm !== undefined ? ` · ${activeHospital.distanceKm} km away` : ''}
+                {activeHospital.distanceKm !== undefined ? ` · ${activeHospital.distanceKm} km from you` : ''}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -142,7 +148,7 @@ export default function HospitalList({ district, onSelect }: HospitalListProps) 
                     <p className="font-semibold text-clinical-text text-sm">{h.name}</p>
                     <p className="text-xs text-clinical-muted">
                       {h.type === 'hospital' ? 'Hospital' : h.type === 'medical_college' ? 'Medical College' : 'Clinic'}
-                      {h.distanceKm !== undefined ? ` · ${h.distanceKm} km away` : ''}
+                      {h.distanceKm !== undefined ? ` · ${h.distanceKm} km from you` : ''}
                     </p>
                     {h.phone && <p className="text-xs text-clinical-muted font-mono mt-0.5">Phone: {h.phone}</p>}
                   </div>

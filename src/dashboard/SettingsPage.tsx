@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { setStoredGeminiKey } from '../hooks/useGeminiConfig';
 
 const DISTRICTS = ['Dhaka', 'Rajshahi', 'Chattogram', 'Khulna', 'Sylhet', 'Barishal', 'Rangpur', 'Mymensingh'];
 
 export default function SettingsPage() {
   const { user, updateProfile, logout } = useAuth();
-  const [geminiKey, setGeminiKey] = useState('');
 
   function deleteMyData() {
     if (!confirm('This permanently deletes all locally stored triage, period, and pregnancy data on this device. Continue?')) return;
@@ -45,17 +42,6 @@ export default function SettingsPage() {
             {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
         </label>
-      </section>
-
-      <section className="card p-4 space-y-2">
-        <h2 className="font-medium">AI configuration</h2>
-        <p className="text-xs text-clinical-muted">Add a Gemini API key to enable AI-assisted triage for ambiguous symptoms and photo analysis. Without it, the app runs on local rules only and stays cautious (defaults to MONITOR) on unclear input.</p>
-        <input type="password" placeholder="Gemini API key" value={geminiKey} onChange={(e) => setGeminiKey(e.target.value)}
-          className="w-full bg-clinical-panel2 border border-clinical-border rounded-md p-2 text-sm" />
-        <button onClick={() => { setStoredGeminiKey(geminiKey); alert('Saved locally on this device.'); }}
-          className="text-xs px-3 py-1.5 rounded-md bg-clinical-panel2 border border-clinical-border">
-          Save key
-        </button>
       </section>
 
       <section className="card p-4 space-y-2">
