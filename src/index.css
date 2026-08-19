@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; }
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(13, 148, 136, 0.05), transparent),
+    radial-gradient(1000px 500px at 110% 10%, rgba(219, 39, 119, 0.03), transparent),
+    #FAF8F5;
+}
+
+::selection { background: rgba(13, 148, 136, 0.2); }
+
+.severity-EMERGENCY { color: #E11D48; }
+.severity-URGENT { color: #EA580C; }
+.severity-MONITOR { color: #D97706; }
+.severity-NORMAL { color: #16A34A; }
+
+.bg-severity-EMERGENCY { background-color: #E11D48; }
+.bg-severity-URGENT { background-color: #EA580C; }
+.bg-severity-MONITOR { background-color: #D97706; }
+.bg-severity-NORMAL { background-color: #16A34A; }
+
+.card {
+  background: #FFFFFF;
+  border: 1px solid #E8E4DC;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 3px rgba(26, 36, 51, 0.04), 0 1px 2px rgba(26, 36, 51, 0.02);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 36, 51, 0.05), 0 2px 4px rgba(26, 36, 51, 0.03);
+}
+
+.card-interactive:active {
+  transform: translateY(0) scale(0.98);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.stagger-item {
+  animation: slideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(225,29,72,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(225,29,72,0); }
+  100% { box-shadow: 0 0 0 0 rgba(225,29,72,0); }
+}
+.pulse-emergency { animation: pulse-ring 2s infinite; }
+
+@keyframes milestone-glow {
+  0% { filter: drop-shadow(0 0 2px rgba(13,148,136,0.2)) scale(1); }
+  50% { filter: drop-shadow(0 0 12px rgba(13,148,136,0.6)) scale(1.02); }
+  100% { filter: drop-shadow(0 0 2px rgba(13,148,136,0.2)) scale(1); }
+}
+.milestone-glow {
+  animation: milestone-glow 2.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse-emergency,
+  .milestone-glow,
+  .stagger-item,
+  .animate-fade-in {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+  .card,
+  .card-interactive {
+    transition: none !important;
+    transform: none !important;
+  }
+}
