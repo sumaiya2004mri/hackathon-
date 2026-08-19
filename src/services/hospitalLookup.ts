@@ -2,8 +2,9 @@ import type { HospitalResult } from '../types';
 
 const OVERPASS_ENDPOINTS = [
   'https://overpass-api.de/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://z.overpass-api.de/api/interpreter',
   'https://overpass.kumi.systems/api/interpreter',
-  'https://overpass.openstreetmap.ru/api/interpreter',
 ];
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -17,52 +18,43 @@ function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): nu
 }
 
 export async function findNearbyHospitals(lat: number, lon: number, radiusMeters = 8000): Promise<HospitalResult[]> {
-  const query = `
-    [out:json][timeout:15];
-    (
-      node["amenity"="hospital"](around:${radiusMeters},${lat},${lon});
-      way["amenity"="hospital"](around:${radiusMeters},${lat},${lon});
-      node["amenity"="clinic"](around:${radiusMeters},${lat},${lon});
-    );
-    out center 20;
-  `;
+  const query = `[out:json][timeout:10];(node["amenity"="hospital"](around:${radiusMeters},${lat},${lon});way["amenity"="hospital"](around:${radiusMeters},${lat},${lon});node["amenity"="clinic"](around:${radiusMeters},${lat},${lon}););out center 20;`;
 
   for (const endpoint of OVERPASS_ENDPOINTS) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
 
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        body: query,
-        headers: { 'Content-Type': 'text/plain' },
-        signal: controller.signal,
-      });
+      // GET request avoids CORS preflight OPTIONS blocking in browsers
+      const url = `${endpoint}?data=${encodeURIComponent(query)}`;
+      const res = await fetch(url, { signal: controller.signal });
 
       clearTimeout(timeoutId);
 
       if (!res.ok) continue;
       const data = await res.json();
 
-      const results: HospitalResult[] = (data.elements ?? [])
+      if (!data?.elements || !Array.isArray(data.elements)) continue;
+
+      const results: HospitalResult[] = data.elements
         .map((el: any) => {
           const elLat = el.lat ?? el.center?.lat;
           const elLon = el.lon ?? el.center?.lon;
           if (elLat == null || elLon == null) return null;
           return {
             id: String(el.id),
-            name: el.tags?.name ?? 'Unnamed facility',
+            name: el.tags?.name ?? el.tags?.['name:en'] ?? 'Unnamed facility',
             lat: elLat,
             lon: elLon,
             distanceKm: Math.round(haversineKm(lat, lon, elLat, elLon) * 10) / 10,
             phone: el.tags?.phone ?? el.tags?.['contact:phone'],
-            type: el.tags?.amenity === 'hospital' ? 'hospital' : 'clinic',
+            type: el.tags?.amenity === 'clinic' ? 'clinic' : 'hospital',
           } as HospitalResult;
         })
         .filter((h: HospitalResult | null): h is HospitalResult => h !== null)
         .sort((a: HospitalResult, b: HospitalResult) => (a.distanceKm ?? 0) - (b.distanceKm ?? 0));
 
-      return results;
+      if (results.length > 0) return results;
     } catch {
       continue;
     }
@@ -70,4 +62,3 @@ export async function findNearbyHospitals(lat: number, lon: number, radiusMeters
 
   return [];
 }
-
