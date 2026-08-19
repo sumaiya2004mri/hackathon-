@@ -1,8 +1,8 @@
 import { HospitalResult } from '../types';
 
-// Multiple public Overpass endpoints as fallbacks
+// Multiple public Overpass endpoints as fallbacks with full routing paths
 const OVERPASS_ENDPOINTS = [
-  'https://overpass-api.de',
+  'https://overpass-api.de/api/interpreter',
   'https://kumi.systems',
   'https://openstreetmap.ru'
 ];
@@ -35,8 +35,8 @@ export async function findNearbyHospitals(lat: number, lon: number, radiusMeters
 
       const res = await fetch(endpoint, {
         method: 'POST',
-        body: query,
-        headers: { 'Content-Type': 'text/plain' },
+        body: 'data=' + encodeURIComponent(query),
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         signal: controller.signal
       });
 
@@ -48,8 +48,8 @@ export async function findNearbyHospitals(lat: number, lon: number, radiusMeters
       
       if (!data || !data.elements) continue;
 
-      // Map the response items using your haversine geometry logic
-      return data.elements.map((el: any) => {
+      // Explicitly return as HospitalResult object mapping array items
+      return data.elements.map((el: any): HospitalResult => {
         const hLat = el.lat ?? el.center?.lat ?? lat;
         const hLon = el.lon ?? el.center?.lon ?? lon;
         return {
@@ -63,7 +63,7 @@ export async function findNearbyHospitals(lat: number, lon: number, radiusMeters
             ? `${el.tags?.['addr:street']} ${el.tags?.['addr:housenumber'] || ''}`.trim()
             : undefined
         };
-      }).sort((a: any, b: any) => a.distance - b.distance);
+      }).sort((a: HospitalResult, b: HospitalResult) => a.distance - b.distance);
 
     } catch (error) {
       console.warn(`Endpoint ${endpoint} failed or timed out. Trying next fallback...`);
