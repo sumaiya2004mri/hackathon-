@@ -48,11 +48,11 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Roxborough CF"', '"Playfair Display"', 'Georgia', 'serif'],
-        heading: ['"Roxborough CF"', '"Playfair Display"', 'Georgia', 'serif'],
-        nav: ['"Roxborough CF"', '"Playfair Display"', 'Georgia', 'serif'],
-        body: ['"Amancio"', '"Playfair Display"', 'system-ui', 'sans-serif'],
-        sans: ['"Amancio"', '"Playfair Display"', 'system-ui', 'sans-serif'],
+        display: ['"Outfit"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
+        heading: ['"Outfit"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
+        subheading: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
+        body: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       }
     },
