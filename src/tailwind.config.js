@@ -48,8 +48,11 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Playfair Display"', 'Georgia', 'serif'],
-        body: ['"Playfair Display"', 'Georgia', 'serif'],
+        display: ['"Roxborough CF"', '"Playfair Display"', 'Georgia', 'serif'],
+        heading: ['"Roxborough CF"', '"Playfair Display"', 'Georgia', 'serif'],
+        nav: ['"Roxborough CF"', '"Playfair Display"', 'Georgia', 'serif'],
+        body: ['"Amancio"', '"Playfair Display"', 'system-ui', 'sans-serif'],
+        sans: ['"Amancio"', '"Playfair Display"', 'system-ui', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       }
     },

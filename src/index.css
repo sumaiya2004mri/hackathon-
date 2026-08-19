@@ -1,11 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
 
+/* Font Declarations with fallbacks */
+@font-face {
+  font-family: 'Roxborough CF';
+  src: local('Roxborough CF'), local('RoxboroughCF-Regular'), local('RoxboroughCF');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Amancio';
+  src: local('Amancio'), local('Amancio-Regular'), local('Amancio-Normal');
+  font-display: swap;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 * {
-  font-family: 'Playfair Display', Georgia, serif;
   box-sizing: border-box;
 }
 
@@ -13,15 +25,16 @@ html {
   font-size: 16px;
 }
 
+/* Default Body Writing Font: Amancio */
+body, p, span, label, input, select, textarea, button, td, th, li {
+  font-family: 'Amancio', 'Playfair Display', Georgia, system-ui, serif;
+}
+
 body {
-  font-family: 'Playfair Display', Georgia, serif;
   background-color: #FFF5F8;
   color: #0F172A;
   font-size: 1.05rem;
   line-height: 1.65;
-}
-
-body {
   background:
     radial-gradient(1200px 600px at 10% -10%, rgba(232, 90, 145, 0.09), transparent),
     radial-gradient(1000px 500px at 110% 10%, rgba(247, 215, 228, 0.45), transparent),
@@ -31,6 +44,20 @@ body {
 ::selection {
   background: rgba(232, 90, 145, 0.25);
   color: #0F172A;
+}
+
+/* Heading & Header Navbar Font: Roxborough CF (As requested in user screenshot) */
+h1, h2, h3, h4,
+.font-display,
+.font-heading,
+.font-nav,
+header,
+header nav,
+header button,
+header a,
+.critical-banner,
+.navbar-heading {
+  font-family: 'Roxborough CF', 'Playfair Display', Georgia, serif !important;
 }
 
 .severity-EMERGENCY { color: #E11D48; }
@@ -53,11 +80,6 @@ body {
 .card-interactive:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(232, 90, 145, 0.12), 0 2px 6px rgba(232, 90, 145, 0.06);
-}
-
-/* Readable Form Control Font Sizing */
-input, select, textarea, button {
-  font-family: 'Playfair Display', Georgia, serif;
 }
 
 @keyframes fadeIn {
