@@ -70,6 +70,24 @@ export default function SettingsPage() {
         )}
       </section>
 
+      {/* Medical History & Background Section */}
+      <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-3">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl p-2 rounded-xl bg-pink-50 border border-pink-200">🩺</span>
+          <div>
+            <h2 className="font-display font-bold text-slate-900 text-base">Medical History & Clinical Background</h2>
+            <p className="text-xs text-slate-600 font-medium">Used for AI triage risk checks and printed under SBAR PDF Background.</p>
+          </div>
+        </div>
+        <textarea
+          rows={3}
+          defaultValue={user.medicalHistoryText ?? ''}
+          placeholder="E.g. Chronic Hypertension, Asthma, Gestational Diabetes, Drug Allergies, Past C-Section..."
+          onBlur={(e) => updateProfile({ medicalHistoryText: e.target.value })}
+          className="w-full bg-pink-50/50 border border-pink-200 rounded-xl p-3 text-xs text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all resize-none"
+        />
+      </section>
+
       {/* Profile Section */}
       <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-4">
         <h2 className="font-display font-bold text-slate-900 text-base">Profile Settings</h2>
@@ -96,7 +114,7 @@ export default function SettingsPage() {
       <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-3">
         <h2 className="font-display font-bold text-slate-900 text-base">Privacy & Local Data Control</h2>
         <p className="text-xs text-slate-700 leading-relaxed font-medium">
-          Your emergency contact, triage, period, and pregnancy records are securely stored on your local browser device. You can export or erase your data at any time.
+          Your emergency contact, medical history, triage, period, and pregnancy records are securely stored on your local browser device. You can export or erase your data at any time.
         </p>
         <div className="flex gap-2 pt-1">
           <button onClick={exportAllData} className="text-xs px-4 py-2 rounded-full bg-pink-50 border border-pink-200 text-slate-900 font-bold hover:bg-pink-100">

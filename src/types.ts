@@ -25,6 +25,7 @@ export interface User {
   district?: string;        // Bangladesh district, drives localized emergency numbers
   pregnancyStatus?: 'not_pregnant' | 'pregnant' | 'postpartum' | 'unspecified';
   emergencyContact?: EmergencyContact;
+  medicalHistoryText?: string; // User entered medical history / background
   medicalHistory?: {
     allergies: string[];
     chronicConditions: string[];

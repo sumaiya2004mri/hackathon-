@@ -1,4 +1,4 @@
-import type { ModuleKind, TriageSession, SeverityLevel } from '../types';
+import type { ModuleKind, TriageSession, SeverityLevel, User } from '../types';
 import { runLocalPass, shouldEscalateToAI, recommendationForSeverity } from './ruleEngine';
 import { runAIPass, GeminiConfig } from './geminiClient';
 
@@ -6,24 +6,24 @@ const SEVERITY_RANK: Record<SeverityLevel, number> = { EMERGENCY: 3, URGENT: 2, 
 
 export async function runTriage(params: {
   userId: string;
+  user?: User;
   symptomEntryId: string;
   freeText: string;
   module: ModuleKind;
   geminiConfig?: GeminiConfig;
 }): Promise<TriageSession> {
-  const { userId, symptomEntryId, freeText, module, geminiConfig } = params;
+  const { userId, user, symptomEntryId, freeText, module, geminiConfig } = params;
 
-  const localPass = runLocalPass(freeText, module);
+  const medicalHistoryText = user?.medicalHistoryText ||
+    (user?.medicalHistory ? `Allergies: ${user.medicalHistory.allergies?.join(', ')}. Conditions: ${user.medicalHistory.chronicConditions?.join(', ')}` : undefined);
+
+  const localPass = runLocalPass(freeText, module, medicalHistoryText);
   let aiPass;
 
-  // Token-optimization: only call Gemini if local pass is unsure AND a key
-  // is configured. If no key, we stay local-only and are transparent about it.
   if (shouldEscalateToAI(localPass) && geminiConfig) {
     aiPass = await runAIPass(freeText, module, geminiConfig);
   }
 
-  // Final severity = the MORE severe of the two passes, never the less severe
-  // — we bias toward caution rather than toward reassurance.
   const finalSeverity: SeverityLevel = aiPass && SEVERITY_RANK[aiPass.severity] > SEVERITY_RANK[localPass.severity]
     ? aiPass.severity
     : localPass.severity;
