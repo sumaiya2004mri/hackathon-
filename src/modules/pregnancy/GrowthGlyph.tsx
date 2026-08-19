@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { WeekData } from './fetalGrowthData';
 
 interface GrowthGlyphProps {
@@ -7,209 +7,185 @@ interface GrowthGlyphProps {
   onPrev: () => void;
 }
 
+const EDUCATIONAL_LABELS = [
+  "Baby's development",
+  "Growing week by week",
+  "Organs continue developing",
+  "Baby begins to move",
+  "Your baby's growth journey",
+];
+
 export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [labelIndex, setLabelIndex] = useState(0);
+  const [loopProgress, setLoopProgress] = useState(0);
 
-  // 3D Tilt state
-  const [rotate, setRotate] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Heartbeat pulse state
-  const [heartbeatActive, setHeartbeatActive] = useState(true);
-  const [activeHotspot, setActiveHotspot] = useState<string | null>(null);
-
-  // Gesture handling
-  const touchStart = useRef<number | null>(null);
-
-  // 3D Mouse Parallax effect
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    const rotateY = (x / (rect.width / 2)) * 12; // deg
-    const rotateX = (-y / (rect.height / 2)) * 12; // deg
-    setRotate({ x: rotateX, y: rotateY });
-  };
-
-  const handleMouseLeave = () => {
-    setRotate({ x: 0, y: 0 });
-    setIsHovered(false);
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStart.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart.current === null) return;
-    const diff = touchStart.current - e.changedTouches[0].clientX;
-    if (Math.abs(diff) > 40) {
-      if (diff > 0) onNext();
-      else onPrev();
+  // 30-second looping animation
+  useEffect(() => {
+    let timer: any = null;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setLoopProgress((prev) => {
+          if (prev >= 100) {
+            setLabelIndex((idx) => (idx + 1) % EDUCATIONAL_LABELS.length);
+            return 0;
+          }
+          return prev + 1; // 100 steps * 300ms = 30s total loop
+        });
+      }, 300);
     }
-    touchStart.current = null;
-  };
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isPlaying]);
 
-  // Play subtle heartbeat audio pulse on tap if enabled
-  const triggerHeartbeat = () => {
-    try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(70, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.12);
-      gain.gain.setValueAtTime(0.2, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.12);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.12);
-    } catch {}
-  };
-
-  // Compute fetal scale according to week
+  // Calculate womb & fetal growth scale based on gestational week (Week 4 to 40)
   const scaleRatio = (weekData.week - 4) / (40 - 4);
-  const embryoScale = 0.75 + scaleRatio * 0.35; // 0.75x to 1.1x
+  const wombScale = 0.9 + scaleRatio * 0.15;
+  const fetusRadius = 10 + scaleRatio * 32; // 10px to 42px
+  const currentLabel = EDUCATIONAL_LABELS[labelIndex];
 
   return (
-    <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={handleMouseLeave}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      className="relative select-none flex flex-col items-center justify-center p-6 bg-slate-950 rounded-2xl border border-rose-500/30 overflow-hidden min-h-[360px] shadow-2xl transition-all duration-300 group"
-      style={{
-        perspective: '1000px',
-      }}
-    >
-      {/* Background ambient lighting and rose fluid glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-950/40 via-slate-950 to-slate-950 pointer-events-none" />
+    <div className="relative select-none flex flex-col items-center justify-between p-6 bg-gradient-to-br from-pink-50/90 via-white to-rose-50/80 rounded-3xl border border-pink-200/80 shadow-sm min-h-[360px] overflow-hidden group">
+      {/* Subtle Background Glow Elements */}
+      <div className="absolute -top-12 -left-12 w-44 h-44 rounded-full bg-pink-200/30 blur-2xl pointer-events-none" />
+      <div className="absolute -bottom-12 -right-12 w-44 h-44 rounded-full bg-rose-200/30 blur-2xl pointer-events-none" />
 
-      {/* Floating 3D particles in amniotic sac */}
-      <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
-        <div className="absolute w-2 h-2 rounded-full bg-rose-400/40 animate-ping top-1/4 left-1/4" />
-        <div className="absolute w-1.5 h-1.5 rounded-full bg-pink-300/50 top-2/3 right-1/3 animate-bounce" />
-        <div className="absolute w-1 h-1 rounded-full bg-rose-200/60 bottom-1/4 left-1/3 animate-pulse" />
+      {/* Top Educational Tag & 30-Second Loop Progress */}
+      <div className="w-full flex flex-col items-center space-y-2 z-10">
+        <div className="flex items-center justify-between w-full text-xs">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-pink-200 text-maternal-primary font-semibold shadow-xs">
+            <span className="w-2 h-2 rounded-full bg-maternal-primary animate-ping" />
+            <span>{currentLabel}</span>
+          </span>
+          <button
+            onClick={() => setIsPlaying(!isPlaying)}
+            className="text-[11px] px-2.5 py-1 rounded-full bg-white border border-pink-200 text-maternal-muted hover:text-maternal-primary transition-colors font-medium shadow-xs"
+          >
+            {isPlaying ? '⏸️ Pause 30s Loop' : '▶️ Play 30s Loop'}
+          </button>
+        </div>
+
+        {/* 30-second progress bar */}
+        <div className="w-full h-1 bg-pink-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-pink-400 to-maternal-primary transition-all duration-300"
+            style={{ width: `${loopProgress}%` }}
+          />
+        </div>
       </div>
 
-      {/* 3D Glassmorphic Fetal Capsule Container */}
-      <div
-        className="relative z-10 flex flex-col items-center justify-center transition-transform duration-200 ease-out"
-        style={{
-          transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale(${isHovered ? 1.03 : 1})`,
-          transformStyle: 'preserve-3d',
-        }}
-      >
-        {/* Glowing Heartbeat Ring */}
-        <div
-          className={`absolute rounded-full border border-rose-400/40 transition-all duration-500 ${
-            heartbeatActive ? 'animate-ping opacity-40' : 'opacity-0'
-          }`}
-          style={{
-            width: `${180 * embryoScale}px`,
-            height: `${240 * embryoScale}px`,
-          }}
-        />
-
-        {/* Translucent Fetal Glass Capsule */}
-        <div
-          className="relative rounded-full overflow-hidden border border-white/20 shadow-[0_0_50px_rgba(225,29,72,0.35)] backdrop-blur-md bg-gradient-to-b from-white/10 via-rose-950/30 to-black/60 transition-transform duration-500 cursor-pointer"
-          style={{
-            width: `${210 * embryoScale}px`,
-            height: `${270 * embryoScale}px`,
-          }}
-          onClick={() => {
-            triggerHeartbeat();
-            setHeartbeatActive(!heartbeatActive);
-          }}
+      {/* Tasteful Educational Womb & Fetal Growth Visualizer */}
+      <div className="relative my-4 z-10 flex flex-col items-center justify-center cursor-pointer">
+        <svg
+          className="w-56 h-56 transition-transform duration-700 ease-out"
+          style={{ transform: `scale(${wombScale})` }}
+          viewBox="0 0 200 200"
         >
-          {/* Glass light reflection highlights */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-rose-300/20 pointer-events-none z-20" />
+          <defs>
+            <radialGradient id="wombFluid" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#F7D7E4" stopOpacity="0.7" />
+              <stop offset="70%" stopColor="#FFF5F8" stopOpacity="0.4" />
+              <stop offset="100%" stopColor="#FCE7F3" stopOpacity="0.1" />
+            </radialGradient>
 
-          {/* Photorealistic 3D Translucent Glass Fetus */}
-          <img
-            src="/glass_fetal_embryo_3d.jpg"
-            alt={`3D Fetal visualization week ${weekData.week}`}
-            className="w-full h-full object-cover rounded-full mix-blend-screen opacity-90 transition-transform duration-500 group-hover:scale-105"
+            <radialGradient id="fetusGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="#E85A91" stopOpacity="0.9" />
+              <stop offset="60%" stopColor="#F7D7E4" stopOpacity="0.5" />
+              <stop offset="100%" stopColor="#E85A91" stopOpacity="0" />
+            </radialGradient>
+          </defs>
+
+          {/* Mother/Womb Contour Silhouette */}
+          <path
+            d="M 100,20 C 145,20 175,55 175,100 C 175,145 145,180 100,180 C 55,180 25,145 25,100 C 25,55 55,20 100,20 Z"
+            fill="url(#wombFluid)"
+            stroke="#F7D7E4"
+            strokeWidth="3"
+            strokeDasharray="6 6"
           />
 
-          {/* Interactive Anatomical Hotspots */}
-          <button
-            title="Fetal Heartbeat"
-            onClick={(e) => {
-              e.stopPropagation();
-              triggerHeartbeat();
-              setActiveHotspot(activeHotspot === 'heart' ? null : 'heart');
-            }}
-            className="absolute top-[42%] left-[45%] z-30 w-4 h-4 rounded-full bg-rose-500/90 border border-white animate-pulse shadow-[0_0_12px_#e11d48]"
+          {/* Inner Amniotic Lining */}
+          <path
+            d="M 100,28 C 138,28 165,60 165,100 C 165,140 138,172 100,172 C 62,172 35,140 35,100 C 35,60 62,28 100,28 Z"
+            fill="none"
+            stroke="#E85A91"
+            strokeWidth="2"
+            strokeOpacity="0.25"
           />
 
-          <button
-            title="Neural & Brain Development"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveHotspot(activeHotspot === 'brain' ? null : 'brain');
-            }}
-            className="absolute top-[22%] left-[52%] z-30 w-4 h-4 rounded-full bg-pink-400/90 border border-white animate-pulse shadow-[0_0_12px_#f472b6]"
+          {/* Umbilical Connection curve representation */}
+          <path
+            d={`M 140,80 Q ${120 + scaleRatio * 10},${100 - scaleRatio * 5} 100,100`}
+            fill="none"
+            stroke="#E85A91"
+            strokeWidth="2"
+            strokeOpacity="0.4"
+            strokeDasharray="3 3"
           />
 
-          <button
-            title="Umbilical Cord & Oxygen Supply"
-            onClick={(e) => {
-              e.stopPropagation();
-              setActiveHotspot(activeHotspot === 'cord' ? null : 'cord');
-            }}
-            className="absolute top-[60%] left-[32%] z-30 w-4 h-4 rounded-full bg-rose-400/90 border border-white animate-pulse shadow-[0_0_12px_#fb7185]"
+          {/* Placenta wall outline */}
+          <path
+            d="M 130,50 Q 155,80 145,120"
+            fill="none"
+            stroke="#E85A91"
+            strokeWidth="4"
+            strokeOpacity="0.3"
+            strokeLinecap="round"
           />
+
+          {/* Fetus Representation Glow */}
+          <circle
+            cx="100"
+            cy="100"
+            r={fetusRadius}
+            fill="url(#fetusGlow)"
+            className="transition-all duration-700 ease-out"
+          />
+
+          {/* Fetus Core Heart Beat Pulse Dot */}
+          <circle
+            cx="100"
+            cy="100"
+            r={Math.max(3, fetusRadius * 0.35)}
+            fill="#E85A91"
+            className="animate-pulse transition-all duration-700"
+          />
+        </svg>
+
+        {/* Floating Amniotic Particles Animation */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute w-1.5 h-1.5 rounded-full bg-pink-300/60 animate-bounce top-1/3 left-1/3" />
+          <div className="absolute w-1 h-1 rounded-full bg-rose-400/50 animate-pulse bottom-1/3 right-1/3" />
         </div>
       </div>
 
-      {/* Interactive Tooltip Card Overlay for Hotspots */}
-      {activeHotspot && (
-        <div className="absolute top-4 z-40 bg-slate-900/95 border border-rose-500/40 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs text-slate-200 shadow-xl max-w-[240px] text-center animate-fade-in">
-          {activeHotspot === 'heart' && '❤️ Fetal Heartbeat: Rates average 120–160 BPM.'}
-          {activeHotspot === 'brain' && '🧠 Brain & Nervous System: Millions of neural connections forming.'}
-          {activeHotspot === 'cord' && '🩸 Umbilical Cord: Delivering vital oxygen & nutrient flow.'}
-        </div>
-      )}
+      {/* Week Navigation & Comparison Footer */}
+      <div className="w-full flex items-center justify-between z-10 pt-2 border-t border-pink-100">
+        <button
+          onClick={onPrev}
+          className="w-8 h-8 rounded-full bg-white border border-pink-200 text-maternal-primary flex items-center justify-center hover:bg-pink-50 transition-colors font-bold text-sm shadow-xs"
+          title="Previous Week"
+        >
+          ‹
+        </button>
 
-      {/* Week & Comparison Footer Controls */}
-      <div className="relative z-20 mt-4 flex flex-col items-center space-y-1">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onPrev}
-            className="w-7 h-7 rounded-full bg-slate-800/80 border border-slate-700 text-rose-400 flex items-center justify-center hover:bg-slate-700 transition-all text-sm"
-            title="Previous Week"
-          >
-            ‹
-          </button>
-
-          <div className="px-4 py-1 rounded-full bg-rose-950/60 border border-rose-500/30 text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-300">
-              Week {weekData.week}
-            </span>
-          </div>
-
-          <button
-            onClick={onNext}
-            className="w-7 h-7 rounded-full bg-slate-800/80 border border-slate-700 text-rose-400 flex items-center justify-center hover:bg-slate-700 transition-all text-sm"
-            title="Next Week"
-          >
-            ›
-          </button>
+        <div className="text-center">
+          <p className="text-xs font-semibold text-maternal-muted uppercase tracking-wider">
+            Week {weekData.week}
+          </p>
+          <p className="text-sm font-display font-semibold text-maternal-text">
+            About the size of <span className="text-maternal-primary font-bold">{weekData.sizeComparison}</span>
+          </p>
         </div>
 
-        <p className="text-sm font-display font-semibold text-slate-200 mt-1">
-          Size of <span className="text-rose-400 font-bold">{weekData.sizeComparison}</span>
-        </p>
-
-        <p className="text-[10px] text-slate-400 flex items-center gap-1.5 pt-1">
-          <span>✨ Drag or move cursor for 3D tilt</span> · <span>Tap glowing dots for organ info</span>
-        </p>
+        <button
+          onClick={onNext}
+          className="w-8 h-8 rounded-full bg-white border border-pink-200 text-maternal-primary flex items-center justify-center hover:bg-pink-50 transition-colors font-bold text-sm shadow-xs"
+          title="Next Week"
+        >
+          ›
+        </button>
       </div>
     </div>
   );

@@ -27,7 +27,9 @@ export default function PregnancyModule() {
   const [tab, setTab] = useState<(typeof TABS)[number]>('Overview');
   const [lmpInput, setLmpInput] = useState('');
 
-  useEffect(() => { if (profile) saveProfile(user.id, profile); }, [profile, user.id]);
+  useEffect(() => {
+    if (profile) saveProfile(user.id, profile);
+  }, [profile, user.id]);
 
   function setupProfile(lmp: string) {
     const dueDate = dueDateFromLMP(lmp);
@@ -49,40 +51,44 @@ export default function PregnancyModule() {
     setProfile(newProfile);
   }
 
-  // Active current week
   const currentWeek = useMemo(() => {
     if (!profile?.lmpDate) return 4;
     return gestationalAgeFromLMP(profile.lmpDate);
   }, [profile?.lmpDate]);
 
-  // Selected interactive week state
   const [selectedWeek, setSelectedWeek] = useState(currentWeek);
 
-  // Sync selected week when profile LMP updates
   useEffect(() => {
     setSelectedWeek(currentWeek);
   }, [currentWeek]);
 
   if (!profile) {
     return (
-      <div className="card p-6 max-w-md mx-auto animate-fade-in">
-        <h2 className="font-display font-semibold text-xl mb-2 text-clinical-text">Set up pregnancy tracking</h2>
-        <p className="text-sm text-clinical-muted mb-4">Enter your last menstrual period (LMP) date to calculate your due date and gestational age.</p>
-        <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block mb-1">
-          Last menstrual period date
-        </label>
-        <input 
-          type="date" 
-          value={lmpInput} 
-          onChange={(e) => setLmpInput(e.target.value)}
-          className="w-full bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-pregnancy-accent transition-all" 
-        />
+      <div className="card p-6 max-w-md mx-auto bg-white border border-maternal-border rounded-3xl shadow-sm space-y-4 animate-fade-in text-center">
+        <div className="w-14 h-14 rounded-full bg-maternal-blush border border-pink-200 flex items-center justify-center mx-auto text-2xl">
+          🤰
+        </div>
+        <h2 className="font-display font-bold text-xl text-maternal-text">Set Up Your Pregnancy Journey</h2>
+        <p className="text-xs text-maternal-muted leading-relaxed">
+          Enter your last menstrual period (LMP) date to calculate gestational age, estimated due date, and personalized care schedules.
+        </p>
+        <div className="text-left space-y-1">
+          <label className="text-xs font-semibold text-maternal-muted uppercase tracking-wider block">
+            Last Menstrual Period (LMP) Date
+          </label>
+          <input
+            type="date"
+            value={lmpInput}
+            onChange={(e) => setLmpInput(e.target.value)}
+            className="w-full bg-maternal-blush border border-maternal-border rounded-xl p-3 text-sm text-maternal-text focus:outline-none focus:border-maternal-primary transition-all"
+          />
+        </div>
         <button
           disabled={!lmpInput}
           onClick={() => setupProfile(lmpInput)}
-          className="w-full mt-4 px-4 py-2.5 rounded-lg bg-pregnancy-accent text-white font-semibold text-sm transition-all hover:bg-pregnancy-accent/90 disabled:opacity-40"
+          className="w-full px-4 py-3 rounded-full bg-maternal-primary hover:bg-maternal-hover text-white font-semibold text-sm transition-all shadow-sm disabled:opacity-40"
         >
-          Start tracking
+          Start tracking pregnancy
         </button>
       </div>
     );
@@ -92,31 +98,43 @@ export default function PregnancyModule() {
   const trimester = selectedWeek < 13 ? 1 : selectedWeek < 28 ? 2 : 3;
 
   return (
-    <div className="space-y-5">
-      {/* Navigation tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {TABS.map((t) => (
-          <button 
-            key={t} 
-            onClick={() => setTab(t)}
-            className={`text-sm px-3.5 py-2 rounded-lg font-medium whitespace-nowrap border transition-all duration-200 ${
-              tab === t 
-                ? 'bg-pregnancy-bg text-pregnancy-accent border-pregnancy-border' 
-                : 'bg-clinical-panel border-clinical-border text-clinical-muted hover:text-clinical-text hover:border-clinical-muted'
-            }`}
-          >
-            {t}
-          </button>
-        ))}
+    <div className="space-y-6 animate-fade-in">
+      {/* Pregnancy Hero & Header */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 bg-white p-5 rounded-3xl border border-maternal-border shadow-xs">
+        <div>
+          <span className="text-xs font-bold uppercase tracking-wider text-maternal-primary">Maternal Companion</span>
+          <h1 className="font-display text-2xl font-bold text-maternal-text">Your Pregnancy Journey</h1>
+          <p className="text-xs text-maternal-muted">
+            Estimated due date: <span className="font-semibold text-maternal-primary">{profile.dueDate}</span>
+          </p>
+        </div>
+
+        {/* Soft Pink Navigation Pills */}
+        <div className="flex gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+          {TABS.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`text-xs px-3.5 py-2 rounded-full font-semibold whitespace-nowrap transition-all duration-200 ${
+                tab === t
+                  ? 'bg-maternal-primary text-white shadow-xs'
+                  : 'bg-maternal-blush text-maternal-muted hover:text-maternal-text hover:bg-pink-100'
+              }`}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Overview tab */}
+      {/* Overview Tab */}
       {tab === 'Overview' && (
-        <div className="space-y-4 animate-fade-in">
-          {/* Dynamic interactive SVG section */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <GrowthGlyph 
-              weekData={weekData} 
+        <div className="space-y-6 animate-fade-in">
+          {/* Main 30-Second Womb Growth Visualizer & Week Banner */}
+          <div className="grid gap-5 md:grid-cols-2 items-stretch">
+            {/* 30-Second Womb Animation Component */}
+            <GrowthGlyph
+              weekData={weekData}
               onNext={() => {
                 const idx = FETAL_GROWTH_BY_WEEK.findIndex((w) => w.week === selectedWeek);
                 if (idx < FETAL_GROWTH_BY_WEEK.length - 1) setSelectedWeek(FETAL_GROWTH_BY_WEEK[idx + 1].week);
@@ -126,84 +144,186 @@ export default function PregnancyModule() {
                 if (idx > 0) setSelectedWeek(FETAL_GROWTH_BY_WEEK[idx - 1].week);
               }}
             />
-            
-            <div className="card p-5 flex flex-col justify-between space-y-4">
-              <div>
-                <p className="text-xs text-clinical-muted font-semibold uppercase tracking-wider">
+
+            {/* Information Card */}
+            <div className="card p-6 bg-white border border-maternal-border rounded-3xl shadow-xs flex flex-col justify-between space-y-4">
+              <div className="space-y-3">
+                <div className="inline-block px-3.5 py-1 rounded-full bg-maternal-blush border border-pink-200 text-maternal-primary text-xs font-bold uppercase tracking-wider">
                   Week {selectedWeek} · Trimester {trimester}
+                </div>
+
+                <h2 className="text-2xl font-display font-bold text-maternal-text">
+                  Baby is about the size of <span className="text-maternal-primary font-bold">{weekData.sizeComparison}</span>
+                </h2>
+
+                <p className="text-xs text-maternal-muted leading-relaxed">
+                  Your baby is making rapid developmental strides this week. Neural connections and organ systems are maturing smoothly.
                 </p>
-                <h3 className="text-2xl font-display font-semibold text-clinical-text mt-1.5">
-                  About the size of <span className="text-pregnancy-accent font-semibold">{weekData.sizeComparison}</span>
-                </h3>
-                
+
                 {weekData.milestone && (
-                  <div className="mt-3 p-3.5 bg-pregnancy-bg border border-pregnancy-border rounded-lg text-sm text-pregnancy-accent stagger-item">
-                    <span className="font-semibold block mb-0.5">✦ Milestone reached:</span> {weekData.milestone}
+                  <div className="p-4 bg-maternal-blush border border-pink-200 rounded-2xl text-xs text-maternal-primary font-medium space-y-1">
+                    <span className="font-bold flex items-center gap-1 text-sm">✦ Milestone Reached:</span>
+                    <p>{weekData.milestone}</p>
                   </div>
                 )}
               </div>
 
-              <div className="border-t border-clinical-border pt-3">
-                <p className="text-xs text-clinical-muted">
-                  Estimated due date: <span className="font-semibold text-clinical-text">{profile.dueDate}</span>
-                </p>
+              <div className="border-t border-maternal-border pt-3 flex items-center justify-between text-xs text-maternal-muted">
+                <span>Calculated gestational age:</span>
+                <span className="font-bold text-maternal-primary">{currentWeek} Weeks</span>
               </div>
             </div>
           </div>
 
-          {/* Interactive slider timeline */}
-          <div className="card p-5">
-            <h4 className="font-display font-medium text-clinical-text text-sm mb-1">Growth progression timeline</h4>
-            <GrowthSlider 
-              currentWeek={currentWeek} 
-              selectedWeek={selectedWeek} 
-              onWeekChange={setSelectedWeek} 
+          {/* Timeline Slider */}
+          <div className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-2">
+            <h3 className="font-display font-semibold text-maternal-text text-sm">Your Pregnancy Timeline</h3>
+            <p className="text-xs text-maternal-muted">Drag or click points to explore week-by-week development from Week 4 to Week 40.</p>
+            <GrowthSlider
+              currentWeek={currentWeek}
+              selectedWeek={selectedWeek}
+              onWeekChange={setSelectedWeek}
             />
+          </div>
+
+          {/* Information Cards Grid (Matching Section 7) */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="card p-4 bg-white border border-maternal-border rounded-2xl space-y-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-maternal-blush text-maternal-primary">👶</span>
+                <h4 className="font-semibold text-maternal-primary text-sm">Baby's Development</h4>
+              </div>
+              <p className="text-xs text-maternal-muted leading-relaxed">
+                Your baby is growing rapidly this week. Major organ and tissue structures are continuing to mature.
+              </p>
+              <button onClick={() => setTab('Overview')} className="text-xs font-semibold text-maternal-primary hover:underline text-left pt-1">
+                Learn more →
+              </button>
+            </div>
+
+            <div className="card p-4 bg-white border border-maternal-border rounded-2xl space-y-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-maternal-blush text-maternal-primary">🌸</span>
+                <h4 className="font-semibold text-maternal-primary text-sm">Mother's Changes</h4>
+              </div>
+              <p className="text-xs text-maternal-muted leading-relaxed">
+                Your body is adapting every week. Track physical changes, energy levels, and essential hydration.
+              </p>
+              <button onClick={() => setTab('Vitals')} className="text-xs font-semibold text-maternal-primary hover:underline text-left pt-1">
+                Track vitals →
+              </button>
+            </div>
+
+            <div className="card p-4 bg-white border border-maternal-border rounded-2xl space-y-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-maternal-blush text-maternal-primary">🏥</span>
+                <h4 className="font-semibold text-maternal-primary text-sm">Important Appointments</h4>
+              </div>
+              <p className="text-xs text-maternal-muted leading-relaxed">
+                Keep track of your ANC visits and TT vaccination schedules per BD health guidelines.
+              </p>
+              <button onClick={() => setTab('Care schedule')} className="text-xs font-semibold text-maternal-primary hover:underline text-left pt-1">
+                View schedule →
+              </button>
+            </div>
+
+            <div className="card p-4 bg-white border border-maternal-border rounded-2xl space-y-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-maternal-blush text-maternal-primary">🥗</span>
+                <h4 className="font-semibold text-maternal-primary text-sm">Nutrition Guidance</h4>
+              </div>
+              <p className="text-xs text-maternal-muted leading-relaxed">
+                Focus on iron, folate, and calcium-rich local foods for optimal maternal & fetal health.
+              </p>
+              <button onClick={() => setTab('Nutrition')} className="text-xs font-semibold text-maternal-primary hover:underline text-left pt-1">
+                View nutrition →
+              </button>
+            </div>
+
+            <div className="card p-4 bg-white border border-maternal-border rounded-2xl space-y-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-maternal-blush text-maternal-primary">💼</span>
+                <h4 className="font-semibold text-maternal-primary text-sm">Delivery Preparation</h4>
+              </div>
+              <p className="text-xs text-maternal-muted leading-relaxed">
+                Prepare your hospital bag checklist and select your preferred emergency delivery hospital.
+              </p>
+              <button onClick={() => setTab('Delivery prep')} className="text-xs font-semibold text-maternal-primary hover:underline text-left pt-1">
+                Prepare now →
+              </button>
+            </div>
+
+            <div className="card p-4 bg-white border border-maternal-border rounded-2xl space-y-2 shadow-xs">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-lg bg-maternal-blush text-maternal-primary">🚨</span>
+                <h4 className="font-semibold text-maternal-primary text-sm">Symptom Check</h4>
+              </div>
+              <p className="text-xs text-maternal-muted leading-relaxed">
+                Log physical symptoms or check warning signs to route into instant emergency evaluation.
+              </p>
+              <button onClick={() => setTab('Symptom check')} className="text-xs font-semibold text-maternal-primary hover:underline text-left pt-1">
+                Check symptoms →
+              </button>
+            </div>
           </div>
 
           <KickCounter userId={user.id} />
         </div>
       )}
 
-      {/* Care schedule tab */}
+      {/* Care Schedule Tab */}
       {tab === 'Care schedule' && (
         <div className="space-y-4 animate-fade-in">
-          <div className="card p-4">
-            <h3 className="font-display font-semibold text-clinical-text text-base mb-3">ANC visits (Bangladesh minimum protocol: 4 visits)</h3>
-            <ul className="space-y-2.5">
-              {profile.ancVisits.map((v, i) => (
-                <li key={v.id} className="flex items-center justify-between text-sm text-clinical-text stagger-item" style={{ animationDelay: `${i * 50}ms` }}>
-                  <span>Visit {v.visitNumber} — around week {v.scheduledWeek}</span>
+          <div className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-3">
+            <h3 className="font-display font-semibold text-maternal-text text-base">ANC Visits (BD Protocol: Minimum 4 Visits)</h3>
+            <ul className="space-y-3">
+              {profile.ancVisits.map((v) => (
+                <li key={v.id} className="flex items-center justify-between text-xs text-maternal-text p-2.5 rounded-xl bg-maternal-blush/60 border border-maternal-border">
+                  <span className="font-medium">Visit {v.visitNumber} — Around Week {v.scheduledWeek}</span>
                   <button
-                    onClick={() => setProfile({ ...profile, ancVisits: profile.ancVisits.map((x) => x.id === v.id ? { ...x, completedAt: x.completedAt ? undefined : new Date().toISOString() } : x) })}
-                    className={`text-xs px-3.5 py-1.5 rounded-lg border transition-all duration-200 active:scale-95 ${
-                      v.completedAt 
-                        ? 'bg-severity-normal/10 text-severity-normal border-severity-normal/30 font-medium' 
-                        : 'bg-clinical-panel2 border-clinical-border text-clinical-muted hover:text-clinical-text'
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        ancVisits: profile.ancVisits.map((x) =>
+                          x.id === v.id ? { ...x, completedAt: x.completedAt ? undefined : new Date().toISOString() } : x
+                        ),
+                      })
+                    }
+                    className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                      v.completedAt
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white border-maternal-border text-maternal-muted hover:text-maternal-primary'
                     }`}
                   >
-                    {v.completedAt ? 'Completed' : 'Mark done'}
+                    {v.completedAt ? '✓ Completed' : 'Mark Done'}
                   </button>
                 </li>
               ))}
             </ul>
           </div>
-          
-          <div className="card p-4">
-            <h3 className="font-display font-semibold text-clinical-text text-base mb-3">Tetanus toxoid (TT) doses</h3>
-            <ul className="space-y-2.5">
-              {profile.ttVaccinations.map((t, i) => (
-                <li key={t.doseNumber} className="flex items-center justify-between text-sm text-clinical-text stagger-item" style={{ animationDelay: `${i * 50}ms` }}>
-                  <span>Dose {t.doseNumber} — scheduled {t.scheduledDate}</span>
+
+          <div className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-3">
+            <h3 className="font-display font-semibold text-maternal-text text-base">Tetanus Toxoid (TT) Immunization</h3>
+            <ul className="space-y-3">
+              {profile.ttVaccinations.map((t) => (
+                <li key={t.doseNumber} className="flex items-center justify-between text-xs text-maternal-text p-2.5 rounded-xl bg-maternal-blush/60 border border-maternal-border">
+                  <span className="font-medium">Dose {t.doseNumber} — Scheduled {t.scheduledDate}</span>
                   <button
-                    onClick={() => setProfile({ ...profile, ttVaccinations: profile.ttVaccinations.map((x) => x.doseNumber === t.doseNumber ? { ...x, completedAt: x.completedAt ? undefined : new Date().toISOString() } : x) })}
-                    className={`text-xs px-3.5 py-1.5 rounded-lg border transition-all duration-200 active:scale-95 ${
-                      t.completedAt 
-                        ? 'bg-severity-normal/10 text-severity-normal border-severity-normal/30 font-medium' 
-                        : 'bg-clinical-panel2 border-clinical-border text-clinical-muted hover:text-clinical-text'
+                    onClick={() =>
+                      setProfile({
+                        ...profile,
+                        ttVaccinations: profile.ttVaccinations.map((x) =>
+                          x.doseNumber === t.doseNumber ? { ...x, completedAt: x.completedAt ? undefined : new Date().toISOString() } : x
+                        ),
+                      })
+                    }
+                    className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all ${
+                      t.completedAt
+                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        : 'bg-white border-maternal-border text-maternal-muted hover:text-maternal-primary'
                     }`}
                   >
-                    {t.completedAt ? 'Completed' : 'Mark done'}
+                    {t.completedAt ? '✓ Completed' : 'Mark Done'}
                   </button>
                 </li>
               ))}
@@ -212,49 +332,59 @@ export default function PregnancyModule() {
         </div>
       )}
 
-      {/* Vitals tab */}
+      {/* Vitals Tab */}
       {tab === 'Vitals' && <VitalsLog profile={profile} onUpdate={setProfile} />}
 
-      {/* Nutrition tab */}
+      {/* Nutrition Tab */}
       {tab === 'Nutrition' && (
-        <div className="space-y-3 animate-fade-in">
-          {BD_NUTRITION_GUIDANCE.map((g, i) => (
-            <div key={g.category} className="card p-4 stagger-item" style={{ animationDelay: `${i * 60}ms` }}>
-              <h3 className="font-display font-semibold text-clinical-text text-base">{g.category}</h3>
-              <p className="text-sm mt-1.5 text-clinical-text">{g.foods.join(', ')}</p>
-              <p className="text-xs text-clinical-muted mt-1.5">{g.note}</p>
+        <div className="space-y-4 animate-fade-in">
+          {BD_NUTRITION_GUIDANCE.map((g) => (
+            <div key={g.category} className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-2">
+              <h3 className="font-display font-bold text-maternal-primary text-base">{g.category}</h3>
+              <p className="text-xs text-maternal-text leading-relaxed font-medium">{g.foods.join(', ')}</p>
+              <p className="text-xs text-maternal-muted">{g.note}</p>
             </div>
           ))}
         </div>
       )}
 
-      {/* Delivery prep tab */}
+      {/* Delivery Prep Tab */}
       {tab === 'Delivery prep' && (
-        <div className="space-y-4 animate-fade-in">
-          <div className="card p-4">
-            <h3 className="font-display font-semibold text-clinical-text text-base mb-3">Choose a preferred delivery facility</h3>
+        <div className="space-y-5 animate-fade-in">
+          <div className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-3">
+            <h3 className="font-display font-semibold text-maternal-text text-base">Select Preferred Delivery Hospital</h3>
             <HospitalList
               district={user.district}
               onSelect={(h: HospitalResult) => setProfile({ ...profile, preferredDeliveryFacility: h })}
             />
             {profile.preferredDeliveryFacility && (
-              <p className="text-sm text-pregnancy-accent font-semibold mt-3">Saved: {profile.preferredDeliveryFacility.name}</p>
+              <p className="text-xs text-maternal-primary font-bold mt-2">Saved Facility: {profile.preferredDeliveryFacility.name}</p>
             )}
           </div>
-          
-          <div className="card p-4">
-            <h3 className="font-display font-semibold text-clinical-text text-base mb-3">Hospital bag checklist</h3>
-            <ul className="space-y-2">
-              {profile.hospitalBagChecklist.map((c, i) => (
-                <li key={c.id} className="flex items-center gap-3 text-sm text-clinical-text stagger-item" style={{ animationDelay: `${i * 30}ms` }}>
-                  <input 
-                    type="checkbox" 
+
+          <div className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-3">
+            <h3 className="font-display font-semibold text-maternal-text text-base">Hospital Bag Checklist</h3>
+            <ul className="space-y-2.5">
+              {profile.hospitalBagChecklist.map((c) => (
+                <li key={c.id} className="flex items-center gap-3 text-xs text-maternal-text">
+                  <input
+                    type="checkbox"
                     checked={c.checked}
                     id={`bag-item-${c.id}`}
-                    onChange={() => setProfile({ ...profile, hospitalBagChecklist: profile.hospitalBagChecklist.map((x) => x.id === c.id ? { ...x, checked: !x.checked } : x) })}
-                    className="w-4 h-4 rounded text-pregnancy-accent focus:ring-pregnancy-accent border-clinical-border transition-all"
+                    onChange={() =>
+                      setProfile({
+                        ...profile,
+                        hospitalBagChecklist: profile.hospitalBagChecklist.map((x) => (x.id === c.id ? { ...x, checked: !x.checked } : x)),
+                      })
+                    }
+                    className="w-4 h-4 rounded text-maternal-primary focus:ring-maternal-primary border-maternal-border"
                   />
-                  <label htmlFor={`bag-item-${c.id}`} className={`select-none transition-all ${c.checked ? 'line-through text-clinical-muted opacity-60' : 'cursor-pointer hover:text-pregnancy-accent'}`}>
+                  <label
+                    htmlFor={`bag-item-${c.id}`}
+                    className={`select-none transition-all ${
+                      c.checked ? 'line-through text-maternal-muted opacity-60' : 'cursor-pointer hover:text-maternal-primary font-medium'
+                    }`}
+                  >
                     {c.label}
                   </label>
                 </li>
@@ -264,10 +394,12 @@ export default function PregnancyModule() {
         </div>
       )}
 
-      {/* Symptom check tab */}
+      {/* Symptom Check Tab */}
       {tab === 'Symptom check' && (
-        <div className="card p-4 animate-fade-in">
-          <p className="text-xs text-clinical-muted mb-3">Danger signs (heavy bleeding, severe headache, vision changes, reduced fetal movement, severe abdominal pain) route straight into the emergency flow below.</p>
+        <div className="card p-6 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-3 animate-fade-in">
+          <p className="text-xs text-maternal-muted">
+            Danger signs (heavy bleeding, severe headache, vision changes, reduced fetal movement, severe abdominal pain) route straight into the emergency triage evaluation below.
+          </p>
           <TriageForm module="pregnancy" />
         </div>
       )}
@@ -291,70 +423,82 @@ function VitalsLog({ profile, onUpdate }: { profile: PregnancyProfile; onUpdate:
       capturedAt: new Date().toISOString(),
     };
     onUpdate({ ...profile, bpGlucoseLogs: [...profile.bpGlucoseLogs, entry] });
-    setSys(''); setDia(''); setGlucose('');
+    setSys('');
+    setDia('');
+    setGlucose('');
   }
 
   const highBP = profile.bpGlucoseLogs.some((v) => (v.bloodPressureSystolic ?? 0) >= 140 || (v.bloodPressureDiastolic ?? 0) >= 90);
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <form onSubmit={addLog} className="card p-4 grid grid-cols-3 gap-3">
-        <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
-          Systolic
-          <input 
-            value={sys} 
-            onChange={(e) => setSys(e.target.value)} 
-            type="number" 
-            className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-pregnancy-accent transition-all" 
+      <form onSubmit={addLog} className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs grid grid-cols-3 gap-3">
+        <label className="text-xs font-semibold text-maternal-muted block">
+          Systolic BP
+          <input
+            value={sys}
+            onChange={(e) => setSys(e.target.value)}
+            type="number"
+            placeholder="120"
+            className="w-full mt-1 bg-maternal-blush border border-maternal-border rounded-xl p-2.5 text-xs text-maternal-text focus:outline-none focus:border-maternal-primary transition-all"
           />
         </label>
-        <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
-          Diastolic
-          <input 
-            value={dia} 
-            onChange={(e) => setDia(e.target.value)} 
-            type="number" 
-            className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-pregnancy-accent transition-all" 
+        <label className="text-xs font-semibold text-maternal-muted block">
+          Diastolic BP
+          <input
+            value={dia}
+            onChange={(e) => setDia(e.target.value)}
+            type="number"
+            placeholder="80"
+            className="w-full mt-1 bg-maternal-blush border border-maternal-border rounded-xl p-2.5 text-xs text-maternal-text focus:outline-none focus:border-maternal-primary transition-all"
           />
         </label>
-        <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
+        <label className="text-xs font-semibold text-maternal-muted block">
           Glucose (mg/dL)
-          <input 
-            value={glucose} 
-            onChange={(e) => setGlucose(e.target.value)} 
-            type="number" 
-            className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-pregnancy-accent transition-all" 
+          <input
+            value={glucose}
+            onChange={(e) => setGlucose(e.target.value)}
+            type="number"
+            placeholder="95"
+            className="w-full mt-1 bg-maternal-blush border border-maternal-border rounded-xl p-2.5 text-xs text-maternal-text focus:outline-none focus:border-maternal-primary transition-all"
           />
         </label>
-        <button 
-          type="submit" 
-          className="col-span-3 px-4 py-2.5 mt-2 rounded-lg bg-pregnancy-accent text-white font-semibold text-sm transition-all hover:bg-pregnancy-accent/90 focus:outline-none focus:ring-2 focus:ring-pregnancy-accent/50 active:scale-[0.99]"
+        <button
+          type="submit"
+          className="col-span-3 px-4 py-2.5 mt-2 rounded-full bg-maternal-primary text-white font-semibold text-xs transition-all shadow-xs hover:bg-maternal-hover"
         >
-          Log reading
+          Log Reading
         </button>
       </form>
 
       {highBP && (
-        <p className="text-sm bg-severity-emergency/10 border border-severity-emergency/30 text-severity-emergency rounded-lg p-3.5 stagger-item">
-          One or more of your blood pressure readings is at or above 140/90, which can be a pre-eclampsia warning sign. Please contact your provider promptly, and use the symptom check if you also have headache, vision changes, or swelling.
-        </p>
+        <div className="p-4 bg-red-50 border border-red-200 text-xs text-red-700 rounded-2xl space-y-1">
+          <span className="font-bold block">⚠️ High Blood Pressure Warning:</span>
+          <p>
+            One or more of your blood pressure readings is at or above 140/90, which can be a pre-eclampsia warning sign. Please contact your provider promptly, and use symptom check if you experience headache, vision changes, or sudden swelling.
+          </p>
+        </div>
       )}
 
-      <div className="card p-4">
-        <h3 className="font-display font-semibold text-clinical-text text-base mb-2">History</h3>
+      <div className="card p-5 bg-white border border-maternal-border rounded-3xl shadow-xs space-y-3">
+        <h3 className="font-display font-semibold text-maternal-text text-base">Recorded Readings History</h3>
         {profile.bpGlucoseLogs.length === 0 ? (
-          <p className="text-sm text-clinical-muted italic">No vital logs recorded yet.</p>
+          <p className="text-xs text-maternal-muted italic">No vital logs recorded yet.</p>
         ) : (
-          <ul className="space-y-2 text-sm text-clinical-muted">
-            {[...profile.bpGlucoseLogs].reverse().map((v, i) => (
-              <li key={v.id} className="stagger-item flex items-center justify-between border-b border-clinical-border/50 pb-1.5 last:border-0 last:pb-0" style={{ animationDelay: `${i * 30}ms` }}>
-                <span className="font-medium text-clinical-text">{new Date(v.capturedAt).toLocaleDateString()}</span>
-                <span className="space-x-3">
+          <ul className="space-y-2 text-xs text-maternal-muted">
+            {[...profile.bpGlucoseLogs].reverse().map((v) => (
+              <li key={v.id} className="flex items-center justify-between border-b border-maternal-border/60 pb-2 last:border-0 last:pb-0">
+                <span className="font-medium text-maternal-text">{new Date(v.capturedAt).toLocaleDateString()}</span>
+                <span className="space-x-2">
                   {v.bloodPressureSystolic && (
-                    <span className="bg-clinical-panel2 px-2 py-0.5 rounded text-xs">BP: <strong className="text-clinical-text">{v.bloodPressureSystolic}/{v.bloodPressureDiastolic}</strong> mmHg</span>
+                    <span className="bg-maternal-blush px-2.5 py-1 rounded-full text-xs font-semibold text-maternal-text border border-maternal-border">
+                      BP: {v.bloodPressureSystolic}/{v.bloodPressureDiastolic} mmHg
+                    </span>
                   )}
                   {v.bloodGlucoseMgDl && (
-                    <span className="bg-clinical-panel2 px-2 py-0.5 rounded text-xs">Glucose: <strong className="text-clinical-text">{v.bloodGlucoseMgDl}</strong> mg/dL</span>
+                    <span className="bg-maternal-blush px-2.5 py-1 rounded-full text-xs font-semibold text-maternal-text border border-maternal-border">
+                      Glucose: {v.bloodGlucoseMgDl} mg/dL
+                    </span>
                   )}
                 </span>
               </li>

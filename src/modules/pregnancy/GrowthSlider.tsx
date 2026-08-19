@@ -27,14 +27,12 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
     return () => clearInterval(intervalId);
   }, [isPlaying, selectedWeek, onWeekChange]);
 
-  // Handle interaction with track (click/drag)
   const handleTrackInteraction = (clientX: number) => {
     if (!trackRef.current) return;
     const rect = trackRef.current.getBoundingClientRect();
     const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     const targetWeek = 4 + pct * (40 - 4);
 
-    // Find the closest registered week stage
     let closestWeek = FETAL_GROWTH_BY_WEEK[0].week;
     let minDiff = Infinity;
     for (const w of FETAL_GROWTH_BY_WEEK) {
@@ -99,8 +97,8 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
             onClick={() => setIsPlaying(!isPlaying)}
             className={`flex items-center justify-center p-2 rounded-full border transition-all ${
               isPlaying
-                ? 'bg-clinical-teal/15 text-clinical-teal border-clinical-teal/30'
-                : 'bg-clinical-panel2 border-clinical-border text-clinical-muted hover:text-clinical-text'
+                ? 'bg-pink-100 text-maternal-primary border-pink-300'
+                : 'bg-maternal-blush border-maternal-border text-maternal-muted hover:text-maternal-primary'
             }`}
             aria-label={isPlaying ? 'Pause auto-play' : 'Play auto-play'}
           >
@@ -114,7 +112,7 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
               </svg>
             )}
           </button>
-          <span className="text-xs text-clinical-muted">
+          <span className="text-xs text-maternal-muted font-medium">
             {isPlaying ? 'Playing timeline...' : 'Auto-play timeline'}
           </span>
         </div>
@@ -127,7 +125,7 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
               setIsPlaying(false);
               onWeekChange(currentWeek);
             }}
-            className="text-xs font-medium text-clinical-teal hover:underline"
+            className="text-xs font-semibold text-maternal-primary hover:underline"
           >
             Back to current week (Week {currentWeek})
           </button>
@@ -140,11 +138,11 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
           ref={trackRef}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
-          className="relative h-2 bg-clinical-panel2 rounded-full cursor-pointer select-none"
+          className="relative h-2.5 bg-pink-100/80 rounded-full cursor-pointer select-none border border-pink-200/50"
         >
           {/* Active track bar fill */}
           <div
-            className="absolute left-0 top-0 h-full bg-clinical-teal rounded-full transition-all duration-300"
+            className="absolute left-0 top-0 h-full bg-gradient-to-r from-pink-400 to-maternal-primary rounded-full transition-all duration-300"
             style={{ width: `${percentage}%` }}
           />
 
@@ -165,12 +163,12 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
                 }}
                 className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 focus:outline-none transition-all duration-300 hover:scale-125 z-10 ${
                   isActive
-                    ? 'bg-clinical-teal border-clinical-teal scale-110'
-                    : 'bg-white border-clinical-border'
+                    ? 'bg-maternal-primary border-maternal-primary scale-110'
+                    : 'bg-white border-pink-300'
                 } ${
                   isMilestoneDot
-                    ? 'w-3 h-3 rounded-md border-2 rotate-45 ring-4 ring-clinical-teal/10'
-                    : 'w-2 h-2 rounded-full border'
+                    ? 'w-3.5 h-3.5 rounded-md border-2 rotate-45 ring-4 ring-pink-500/10'
+                    : 'w-2.5 h-2.5 rounded-full border'
                 }`}
                 style={{ left: `${dotPct}%` }}
                 title={`Week ${item.week}`}
@@ -180,7 +178,7 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
 
           {/* Drag Handle */}
           <div
-            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white border-2 border-clinical-teal shadow-md flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 z-20 ${
+            className={`absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-6 h-6 rounded-full bg-white border-2 border-maternal-primary shadow-md flex items-center justify-center cursor-grab active:cursor-grabbing hover:scale-110 z-20 ${
               isDragging ? 'cursor-grabbing scale-110' : ''
             }`}
             style={{
@@ -188,12 +186,11 @@ export default function GrowthSlider({ currentWeek, selectedWeek, onWeekChange }
               transition: isDragging || isPlaying ? 'none' : 'left 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
             }}
           >
-            <div className={`w-2.5 h-2.5 rounded-full bg-clinical-teal ${isMilestone ? 'animate-ping' : ''}`} />
+            <div className={`w-2.5 h-2.5 rounded-full bg-maternal-primary ${isMilestone ? 'animate-ping' : ''}`} />
           </div>
         </div>
       </div>
 
-      {/* Screen-reader accessible range input */}
       <input
         type="range"
         min="4"
