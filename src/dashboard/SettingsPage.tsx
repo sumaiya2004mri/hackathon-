@@ -32,39 +32,39 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-xl space-y-6 font-body animate-fade-in">
-      <h1 className="font-display text-3xl font-extrabold text-slate-900">{t('settings')}</h1>
+      <h1 className="font-display text-3xl md:text-4xl font-extrabold text-slate-900">{t('settings')}</h1>
 
       {/* Mandatory Emergency Contact Card */}
-      <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-3">
+      <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="text-2xl p-2 rounded-xl bg-pink-50 border border-pink-200">🚨</span>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl p-2.5 rounded-2xl bg-pink-50 border border-pink-200">🚨</span>
             <div>
-              <h2 className="font-display font-bold text-slate-900 text-base">{t('emergencyContact')}</h2>
-              <p className="text-xs text-slate-600 font-medium">{t('emergencyContactSub')}</p>
+              <h2 className="font-display font-extrabold text-slate-900 text-base md:text-lg">{t('emergencyContact')}</h2>
+              <p className="text-xs md:text-sm text-slate-600 font-medium">{t('emergencyContactSub')}</p>
             </div>
           </div>
           <button
             onClick={() => setIsContactModalOpen(true)}
-            className="px-4 py-2 rounded-full bg-[#E85A91] hover:bg-[#D4437B] text-white text-xs font-bold shadow-xs transition-all"
+            className="px-4 py-2 rounded-full bg-[#E85A91] hover:bg-[#D4437B] text-white text-xs md:text-sm font-bold shadow-xs transition-all shrink-0"
           >
-            {user.emergencyContact ? 'Edit Contact' : 'Add Contact'}
+            {user.emergencyContact ? t('editContact') : t('addContact')}
           </button>
         </div>
 
         {user.emergencyContact ? (
-          <div className="p-3.5 rounded-2xl bg-pink-50/70 border border-pink-200 text-xs text-slate-900 font-bold flex items-center justify-between">
+          <div className="p-4 rounded-2xl bg-pink-50/70 border border-pink-200 text-xs md:text-sm text-slate-900 font-bold flex items-center justify-between">
             <div>
-              <span className="text-slate-500 block text-[10px] uppercase tracking-wider">{t('contactPhone')}</span>
-              <span className="font-mono text-sm font-extrabold text-[#E85A91]">{user.emergencyContact.phone}</span>
+              <span className="text-slate-500 block text-[11px] uppercase tracking-wider">{t('contactPhone')}</span>
+              <span className="font-mono text-sm md:text-base font-extrabold text-[#E85A91]">{user.emergencyContact.phone}</span>
             </div>
             <div className="text-right">
-              <span className="text-slate-500 block text-[10px] uppercase tracking-wider">{t('relationship')}</span>
-              <span className="font-bold text-slate-900">{user.emergencyContact.relationship}</span>
+              <span className="text-slate-500 block text-[11px] uppercase tracking-wider">{t('relationship')}</span>
+              <span className="font-extrabold text-slate-900 text-xs md:text-sm">{user.emergencyContact.relationship}</span>
             </div>
           </div>
         ) : (
-          <p className="text-xs text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200 font-bold">
+          <p className="text-xs md:text-sm text-amber-800 bg-amber-50 p-3.5 rounded-2xl border border-amber-200 font-bold">
             ⚠️ {t('mandatoryNotice')}
           </p>
         )}
@@ -72,39 +72,39 @@ export default function SettingsPage() {
 
       {/* Medical History & Background Section */}
       <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-3">
-        <div className="flex items-center gap-2.5">
-          <span className="text-xl p-2 rounded-xl bg-pink-50 border border-pink-200">🩺</span>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl p-2.5 rounded-2xl bg-pink-50 border border-pink-200">🩺</span>
           <div>
-            <h2 className="font-display font-bold text-slate-900 text-base">Medical History & Clinical Background</h2>
-            <p className="text-xs text-slate-600 font-medium">Used for AI triage risk checks and printed under SBAR PDF Background.</p>
+            <h2 className="font-display font-extrabold text-slate-900 text-base md:text-lg">{t('medicalHistoryTitle')}</h2>
+            <p className="text-xs md:text-sm text-slate-600 font-medium">{t('medicalHistorySub')}</p>
           </div>
         </div>
         <textarea
           rows={3}
           defaultValue={user.medicalHistoryText ?? ''}
-          placeholder="E.g. Chronic Hypertension, Asthma, Gestational Diabetes, Drug Allergies, Past C-Section..."
+          placeholder={lang === 'bn' ? 'যেমন: উচ্চ রক্তচাপ, হাঁপানি, ডায়াবেটিস, অ্যালার্জি, আগে সি-সেকশন হয়েছে...' : 'E.g. Chronic Hypertension, Asthma, Gestational Diabetes, Drug Allergies, Past C-Section...'}
           onBlur={(e) => updateProfile({ medicalHistoryText: e.target.value })}
-          className="w-full bg-pink-50/50 border border-pink-200 rounded-xl p-3 text-xs text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all resize-none"
+          className="w-full bg-pink-50/60 border border-pink-200 rounded-2xl p-3.5 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all resize-none"
         />
       </section>
 
       {/* Profile Section */}
       <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-4">
-        <h2 className="font-display font-bold text-slate-900 text-base">Profile Settings</h2>
-        <label className="text-xs font-bold text-slate-700 block">Name
+        <h2 className="font-display font-extrabold text-slate-900 text-base md:text-lg">{t('profileSettings')}</h2>
+        <label className="text-xs md:text-sm font-bold text-slate-700 block">{t('name')}
           <input
             defaultValue={user.name}
             onBlur={(e) => updateProfile({ name: e.target.value })}
-            className="w-full mt-1 bg-pink-50/50 border border-pink-200 rounded-xl p-3 text-xs text-slate-900 font-bold focus:outline-none focus:border-[#E85A91]"
+            className="w-full mt-1.5 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91]"
           />
         </label>
-        <label className="text-xs font-bold text-slate-700 block">District (Drives Local Emergency Department Lookup)
+        <label className="text-xs md:text-sm font-bold text-slate-700 block">{t('districtLabel')}
           <select
             defaultValue={user.district}
             onChange={(e) => updateProfile({ district: e.target.value })}
-            className="w-full mt-1 bg-pink-50/50 border border-pink-200 rounded-xl p-3 text-xs text-slate-900 font-bold focus:outline-none focus:border-[#E85A91]"
+            className="w-full mt-1.5 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91]"
           >
-            <option value="">Select district</option>
+            <option value="">{lang === 'bn' ? 'জেলা নির্বাচন করুন' : 'Select district'}</option>
             {DISTRICTS.map((d) => <option key={d} value={d}>{d}</option>)}
           </select>
         </label>
@@ -112,23 +112,23 @@ export default function SettingsPage() {
 
       {/* Privacy Section */}
       <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-3">
-        <h2 className="font-display font-bold text-slate-900 text-base">Privacy & Local Data Control</h2>
-        <p className="text-xs text-slate-700 leading-relaxed font-medium">
-          Your emergency contact, medical history, triage, period, and pregnancy records are securely stored on your local browser device. You can export or erase your data at any time.
+        <h2 className="font-display font-extrabold text-slate-900 text-base md:text-lg">{t('privacyTitle')}</h2>
+        <p className="text-xs md:text-sm text-slate-700 leading-relaxed font-medium">
+          {t('privacySub')}
         </p>
-        <div className="flex gap-2 pt-1">
-          <button onClick={exportAllData} className="text-xs px-4 py-2 rounded-full bg-pink-50 border border-pink-200 text-slate-900 font-bold hover:bg-pink-100">
-            Export My Data
+        <div className="flex flex-wrap gap-2.5 pt-2">
+          <button onClick={exportAllData} className="text-xs md:text-sm font-bold px-5 py-2.5 rounded-full bg-pink-50 border border-pink-200 text-slate-900 hover:bg-pink-100 transition-all">
+            {t('exportData')}
           </button>
-          <button onClick={deleteMyData} className="text-xs px-4 py-2 rounded-full bg-rose-100 text-rose-700 border border-rose-300 font-bold hover:bg-rose-200">
-            Delete My Data
+          <button onClick={deleteMyData} className="text-xs md:text-sm font-bold px-5 py-2.5 rounded-full bg-rose-100 text-rose-700 border border-rose-300 hover:bg-rose-200 transition-all">
+            {t('deleteData')}
           </button>
         </div>
       </section>
 
       {!user.isGuest && (
-        <button onClick={logout} className="text-xs text-rose-600 font-bold hover:underline">
-          Log out from account
+        <button onClick={logout} className="text-xs md:text-sm text-rose-600 font-extrabold hover:underline">
+          {t('logout')}
         </button>
       )}
 

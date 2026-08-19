@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { PeriodLog } from '../../types';
 import { useAuth } from '../../auth/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { computeCycleStats } from './cycleStats';
 import { exportPeriodCSV, exportPeriodReportPDF, downloadBlob } from '../../export/exportEngine';
 import TriageForm from '../../components/TriageForm';
@@ -16,8 +17,14 @@ function saveLogs(userId: string, logs: PeriodLog[]) {
   localStorage.setItem(`${STORAGE_KEY}:${userId}`, JSON.stringify(logs));
 }
 
+const FLOW_TRANSLATION: Record<'en' | 'bn', Record<string, string>> = {
+  en: { light: 'Light Flow', medium: 'Medium Flow', heavy: 'Heavy Flow' },
+  bn: { light: 'হালকা রক্তস্রাব', medium: 'মাঝারি রক্তস্রাব', heavy: 'অতিরিক্ত রক্তস্রাব' },
+};
+
 export default function PeriodModule() {
   const { user } = useAuth();
+  const { lang, t } = useLanguage();
   const navigate = useNavigate();
   const [logs, setLogs] = useState<PeriodLog[]>(() => loadLogs(user.id));
   const [showSymptomCheck, setShowSymptomCheck] = useState(false);
@@ -45,131 +52,137 @@ export default function PeriodModule() {
     setForm({ start: '', end: '', flow: 'medium', symptoms: '', mood: '' });
   }
 
+  const flowMap = FLOW_TRANSLATION[lang] ?? FLOW_TRANSLATION.en;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-body animate-fade-in">
       {/* Log a cycle form */}
-      <section className="card p-5 animate-fade-in">
-        <h2 className="font-display font-semibold text-xl mb-3 text-clinical-text">Log a cycle</h2>
-        <form onSubmit={addLog} className="grid grid-cols-2 gap-4">
-          <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
-            Start date
-            <input 
-              type="date" 
-              required 
-              value={form.start} 
+      <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-4">
+        <h2 className="font-display font-extrabold text-2xl text-slate-900">{t('logCycle')}</h2>
+        <form onSubmit={addLog} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label className="text-xs md:text-sm font-bold text-slate-700 block">
+            {t('startDate')} <span className="text-red-500">*</span>
+            <input
+              type="date"
+              required
+              value={form.start}
               onChange={(e) => setForm({ ...form, start: e.target.value })}
-              className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-period-accent transition-all duration-200" 
+              className="w-full mt-1 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all"
             />
           </label>
-          
-          <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
-            End date (optional)
-            <input 
-              type="date" 
-              value={form.end} 
+
+          <label className="text-xs md:text-sm font-bold text-slate-700 block">
+            {t('endDate')}
+            <input
+              type="date"
+              value={form.end}
               onChange={(e) => setForm({ ...form, end: e.target.value })}
-              className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-period-accent transition-all duration-200" 
+              className="w-full mt-1 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all"
             />
           </label>
-          
-          <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
-            Flow
-            <select 
-              value={form.flow} 
+
+          <label className="text-xs md:text-sm font-bold text-slate-700 block">
+            {t('flow')}
+            <select
+              value={form.flow}
               onChange={(e) => setForm({ ...form, flow: e.target.value as any })}
-              className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-period-accent transition-all duration-200"
+              className="w-full mt-1 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all"
             >
-              <option value="light">Light</option>
-              <option value="medium">Medium</option>
-              <option value="heavy">Heavy</option>
+              <option value="light">{lang === 'bn' ? 'হালকা (Light)' : 'Light'}</option>
+              <option value="medium">{lang === 'bn' ? 'মাঝারি (Medium)' : 'Medium'}</option>
+              <option value="heavy">{lang === 'bn' ? 'অতিরিক্ত (Heavy)' : 'Heavy'}</option>
             </select>
           </label>
-          
-          <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block">
-            Mood (optional)
-            <input 
-              value={form.mood} 
+
+          <label className="text-xs md:text-sm font-bold text-slate-700 block">
+            {t('mood')}
+            <input
+              value={form.mood}
               onChange={(e) => setForm({ ...form, mood: e.target.value })}
-              placeholder="e.g. happy, tired, moody"
-              className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-period-accent transition-all duration-200" 
+              placeholder={lang === 'bn' ? 'যেমন: আনন্দিত, ক্লান্ত, মেজাজ খিটখিটে' : 'e.g. happy, tired, moody'}
+              className="w-full mt-1 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all"
             />
           </label>
-          
-          <label className="text-xs font-semibold text-clinical-muted uppercase tracking-wider block col-span-2">
-            Symptoms (comma separated)
-            <input 
-              value={form.symptoms} 
+
+          <label className="text-xs md:text-sm font-bold text-slate-700 block md:col-span-2">
+            {t('symptomsLabel')}
+            <input
+              value={form.symptoms}
               onChange={(e) => setForm({ ...form, symptoms: e.target.value })}
-              placeholder="e.g. cramps, bloating, fatigue"
-              className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-lg p-2.5 text-sm text-clinical-text focus:outline-none focus:ring-2 focus:ring-period-accent transition-all duration-200" 
+              placeholder={lang === 'bn' ? 'যেমন: পেটে কামড়ানি, পেট ফোলা, দুর্বলতা' : 'e.g. cramps, bloating, fatigue'}
+              className="w-full mt-1 bg-pink-50/60 border border-pink-200 rounded-xl p-3 text-xs md:text-sm text-slate-900 font-bold focus:outline-none focus:border-[#E85A91] transition-all"
             />
           </label>
-          
-          <button 
-            type="submit" 
-            className="col-span-2 px-4 py-2.5 mt-2 rounded-lg bg-period-accent text-white font-semibold text-sm transition-all hover:bg-period-accent/90 focus:outline-none focus:ring-2 focus:ring-period-accent/50 active:scale-[0.99]"
+
+          <button
+            type="submit"
+            className="md:col-span-2 px-6 py-3.5 mt-2 rounded-full bg-[#E85A91] hover:bg-[#D4437B] text-white font-bold text-xs md:text-sm transition-all shadow-md active:scale-[0.99]"
           >
-            Save cycle log
+            {t('saveCycleLog')}
           </button>
         </form>
       </section>
 
       {/* Cycle stats card */}
       {logs.length > 0 && (
-        <section className="card p-5 animate-fade-in">
-          <h2 className="font-display font-semibold text-xl mb-4 text-clinical-text">Your cycle, at a glance</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <Stat label="Average cycle length" value={`${stats.averageCycleLengthDays} days`} />
-            <Stat label="Average period length" value={`${stats.averagePeriodLengthDays} days`} />
-            <Stat label="Predicted next period" value={stats.predictedNextStart} />
-            <Stat label="Predicted fertile window" value={`${stats.predictedFertileWindow[0]} – ${stats.predictedFertileWindow[1]}`} />
+        <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-4 animate-fade-in">
+          <h2 className="font-display font-extrabold text-2xl text-slate-900">{t('cycleStats')}</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            <Stat label={t('avgCycleLength')} value={`${stats.averageCycleLengthDays} ${lang === 'bn' ? 'দিন' : 'days'}`} />
+            <Stat label={t('avgPeriodLength')} value={`${stats.averagePeriodLengthDays} ${lang === 'bn' ? 'দিন' : 'days'}`} />
+            <Stat label={t('predictedNextStart')} value={stats.predictedNextStart} />
+            <Stat label={t('predictedFertileWindow')} value={`${stats.predictedFertileWindow[0]} – ${stats.predictedFertileWindow[1]}`} />
           </div>
 
           {stats.irregularityNote && (
-            <p className="mt-4 text-sm bg-severity-monitor/10 border border-severity-monitor/30 text-severity-monitor rounded-lg p-3.5 stagger-item">
+            <p className="mt-4 text-xs md:text-sm bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl p-4 font-bold">
               {stats.irregularityNote}
             </p>
           )}
 
           {stats.isLate && (
-            <div className="mt-4 text-sm bg-period-bg border border-period-border text-clinical-text rounded-lg p-4 stagger-item">
-              <p>Your period is {stats.daysLate} day{stats.daysLate === 1 ? '' : 's'} later than your usual pattern. This can happen for many reasons — stress, travel, illness — but if you've been sexually active, it may be worth considering a pregnancy test.</p>
+            <div className="mt-4 text-xs md:text-sm bg-pink-50 border border-pink-200 text-slate-900 rounded-2xl p-4 font-medium space-y-2">
+              <p className="font-bold text-slate-900">
+                {lang === 'bn'
+                  ? `আপনার পিরিয়ড স্বাভাবিক সময়ের থেকে ${stats.daysLate} দিন দেরিতে হচ্ছে। এটি মানসিক চাপ, ভ্রমণ বা শারীরিক কারণে হতে পারে।`
+                  : `Your period is ${stats.daysLate} day(s) later than usual pattern.`}
+              </p>
               <button
                 onClick={() => navigate('/pregnancy')}
-                className="mt-3 text-xs font-semibold px-3.5 py-2 rounded-lg bg-period-accent text-white border border-period-accent transition-all hover:bg-period-accent/90"
+                className="text-xs font-bold px-4 py-2 rounded-full bg-[#E85A91] text-white transition-all hover:bg-[#D4437B]"
               >
-                Set up pregnancy tracking →
+                {lang === 'bn' ? 'গর্ভাবস্থা ট্র্যাকিং দেখুন →' : 'Set up pregnancy tracking →'}
               </button>
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2.5 mt-5 border-t border-clinical-border/50 pt-4">
+          <div className="flex flex-wrap gap-3 mt-4 border-t border-pink-100 pt-4">
             <button
               onClick={() => downloadBlob(exportPeriodCSV(logs), 'period-history.csv')}
-              className="text-xs px-3.5 py-2 rounded-lg bg-clinical-panel2 border border-clinical-border font-medium text-clinical-text hover:bg-clinical-panel hover:border-clinical-muted transition-all"
+              className="text-xs font-bold px-4 py-2 rounded-full bg-pink-50 border border-pink-200 text-slate-900 hover:bg-pink-100 transition-all"
             >
-              Export CSV
+              📄 {lang === 'bn' ? 'CSV ফাইল ডাউনলোড করুন' : 'Export CSV'}
             </button>
             <button
               onClick={() => downloadBlob(exportPeriodReportPDF(logs, stats, user), 'period-summary.pdf')}
-              className="text-xs px-3.5 py-2 rounded-lg bg-clinical-panel2 border border-clinical-border font-medium text-clinical-text hover:bg-clinical-panel hover:border-clinical-muted transition-all"
+              className="text-xs font-bold px-4 py-2 rounded-full bg-pink-50 border border-pink-200 text-slate-900 hover:bg-pink-100 transition-all"
             >
-              Export doctor-shareable PDF
+              📄 {lang === 'bn' ? 'ডাক্তারের উপযোগী PDF রিপোর্ট' : 'Export doctor-shareable PDF'}
             </button>
           </div>
         </section>
       )}
 
       {/* Symptom Checker entry point */}
-      <section className="card p-4 animate-fade-in">
-        <h2 className="font-display font-semibold text-lg mb-1 text-clinical-text">Is something wrong?</h2>
-        <p className="text-xs text-clinical-muted mb-3">Symptom check runs through the same triage engine as the emergency module — anything urgent routes to hospital lookup automatically.</p>
+      <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-3 animate-fade-in">
+        <h2 className="font-display font-extrabold text-xl text-slate-900">{t('isSomethingWrong')}</h2>
+        <p className="text-xs md:text-sm text-slate-600 font-medium">{t('periodSymptomSub')}</p>
         {!showSymptomCheck ? (
-          <button 
-            onClick={() => setShowSymptomCheck(true)} 
-            className="text-sm font-medium px-4 py-2.5 rounded-lg bg-clinical-panel2 border border-clinical-border text-clinical-text hover:bg-clinical-panel hover:border-clinical-muted transition-all"
+          <button
+            onClick={() => setShowSymptomCheck(true)}
+            className="text-xs md:text-sm font-bold px-5 py-2.5 rounded-full bg-pink-50 border border-pink-200 text-[#E85A91] hover:bg-pink-100 transition-all"
           >
-            Check a period symptom
+            {t('checkPeriodSymptom')}
           </button>
         ) : (
           <TriageForm module="period" />
@@ -177,43 +190,37 @@ export default function PeriodModule() {
       </section>
 
       {/* History section */}
-      <section className="card p-5 animate-fade-in">
-        <h2 className="font-display font-semibold text-xl mb-4 text-clinical-text">History</h2>
+      <section className="p-6 bg-white border border-pink-200 rounded-3xl shadow-sm space-y-4 animate-fade-in">
+        <h2 className="font-display font-extrabold text-2xl text-slate-900">{t('history')}</h2>
         {logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center text-center py-6 space-y-4">
-            <div className="w-16 h-16 rounded-full bg-period-bg border border-period-border flex items-center justify-center text-period-accent">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
-              </svg>
+          <div className="flex flex-col items-center justify-center text-center py-6 space-y-3">
+            <div className="w-16 h-16 rounded-full bg-pink-100 border border-pink-300 flex items-center justify-center text-2xl text-[#E85A91]">
+              🌸
             </div>
             <div>
-              <h3 className="font-display font-semibold text-clinical-text text-base">No period logs yet</h3>
-              <p className="text-xs text-clinical-muted mt-1 max-w-xs mx-auto">
-                Start logging your cycles above to see predictions, fertile windows, and detailed history analysis.
-              </p>
+              <h3 className="font-display font-bold text-slate-900 text-base">{t('noPeriodLogs')}</h3>
             </div>
           </div>
         ) : (
-          <ul className="space-y-2.5 text-sm text-clinical-muted">
-            {[...logs].reverse().map((l, i) => (
-              <li 
-                key={l.id} 
-                className="stagger-item flex items-center justify-between border-b border-clinical-border/50 pb-2.5 last:border-0 last:pb-0"
-                style={{ animationDelay: `${i * 40}ms` }}
+          <ul className="space-y-3 text-xs md:text-sm text-slate-700 font-medium">
+            {[...logs].reverse().map((l) => (
+              <li
+                key={l.id}
+                className="flex items-center justify-between p-3.5 rounded-2xl bg-pink-50/60 border border-pink-200"
               >
                 <div>
-                  <span className="font-semibold text-clinical-text">{l.cycleStartDate}</span>
-                  <span className="mx-2 text-clinical-muted">→</span>
-                  <span className={l.cycleEndDate ? 'font-semibold text-clinical-text' : 'italic text-period-accent font-medium'}>
-                    {l.cycleEndDate ?? 'ongoing'}
+                  <span className="font-extrabold text-slate-900">{l.cycleStartDate}</span>
+                  <span className="mx-2 text-slate-400">→</span>
+                  <span className={l.cycleEndDate ? 'font-bold text-slate-900' : 'italic text-[#E85A91] font-bold'}>
+                    {l.cycleEndDate ?? (lang === 'bn' ? 'চলমান' : 'ongoing')}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="bg-period-bg text-period-accent text-xs px-2.5 py-1 rounded-md border border-period-border font-semibold capitalize">
-                    {l.flowIntensity}
+                  <span className="bg-pink-100 text-[#E85A91] text-xs px-3 py-1 rounded-full border border-pink-200 font-bold">
+                    {flowMap[l.flowIntensity] ?? l.flowIntensity}
                   </span>
                   {l.symptoms.length > 0 && (
-                    <span className="bg-clinical-panel2 text-clinical-muted text-xs px-2.5 py-1 rounded-md border border-clinical-border">
+                    <span className="bg-white text-slate-700 text-xs px-3 py-1 rounded-full border border-pink-200 font-bold">
                       {l.symptoms.join(', ')}
                     </span>
                   )}
@@ -229,9 +236,9 @@ export default function PeriodModule() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="bg-clinical-panel2 p-3.5 rounded-lg border border-clinical-border/30">
-      <p className="text-xs text-clinical-muted font-medium uppercase tracking-wider">{label}</p>
-      <p className="font-display font-semibold text-lg text-clinical-text mt-1">{value}</p>
+    <div className="bg-pink-50/70 p-4 rounded-2xl border border-pink-200">
+      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</p>
+      <p className="font-display font-extrabold text-lg text-slate-900 mt-1">{value}</p>
     </div>
   );
 }
