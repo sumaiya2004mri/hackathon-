@@ -1,13 +1,39 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { PregnancyProfile, Vitals, HospitalResult } from '../../types';
 import { useAuth } from '../../auth/AuthContext';
-import { getWeekData, gestationalAgeFromLMP, dueDateFromLMP } from './fetalGrowthData';
+import { gestationalAgeFromLMP, dueDateFromLMP } from './fetalGrowthData';
 import { DEFAULT_ANC_SCHEDULE, DEFAULT_HOSPITAL_BAG_CHECKLIST, BD_NUTRITION_GUIDANCE } from './ancScheduleData';
 import KickCounter from './KickCounter';
+import GrowthSlider from './GrowthSlider';
 import TriageForm from '../../components/TriageForm';
 import HospitalList from '../../components/HospitalList';
 
 const STORAGE_KEY = 'ea_pregnancy_profile';
+
+// Spec item 7 — small static content array, not AI-generated per load.
+const TRIMESTER_ENCOURAGEMENT: Record<1 | 2 | 3, string[]> = {
+  1: [
+    'Early days — your body is doing enormous work you can\'t even see yet.',
+    'It\'s normal to feel tired right now. Rest when you can.',
+  ],
+  2: [
+    'Many people feel their best energy during this stretch — enjoy it if it comes.',
+    'You might start feeling movement soon, if you haven\'t already.',
+  ],
+  3: [
+    'You\'re in the home stretch. Rest, prep, and be gentle with yourself.',
+    'Your body is getting ready for one of the biggest things it will ever do.',
+  ],
+};
+
+const MILESTONE_WEEKS = [12, 24, 37]; // end of 1st tri, viability, full term
+
+function pickEncouragement(trimester: 1 | 2 | 3): string {
+  const options = TRIMESTER_ENCOURAGEMENT[trimester];
+  // deterministic-per-day so it doesn't flicker on every re-render
+  const dayIndex = new Date().getDate() % options.length;
+  return options[dayIndex];
+}
 
 function loadProfile(userId: string): PregnancyProfile | null {
   const raw = localStorage.getItem(`${STORAGE_KEY}:${userId}`);
@@ -49,17 +75,17 @@ export default function PregnancyModule() {
 
   if (!profile) {
     return (
-      <div className="card p-6 max-w-md">
-        <h2 className="font-display font-semibold text-lg mb-2">Set up pregnancy tracking</h2>
-        <p className="text-sm text-clinical-muted mb-4">Enter your last menstrual period (LMP) date to calculate your due date and gestational age.</p>
-        <label className="text-xs text-clinical-muted">Last menstrual period date
+      <div className="card card-pregnancy p-6 max-w-md">
+        <h2 className="font-display font-semibold text-lg mb-2 text-ink">Set up pregnancy tracking</h2>
+        <p className="text-sm text-ink-muted mb-4">Enter your last menstrual period (LMP) date to calculate your due date and gestational age.</p>
+        <label className="text-xs text-ink-muted">Last menstrual period date
           <input type="date" value={lmpInput} onChange={(e) => setLmpInput(e.target.value)}
-            className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-md p-2 text-sm" />
+            className="w-full mt-1 bg-white border border-cream-border rounded-md p-2 text-sm text-ink" />
         </label>
         <button
           disabled={!lmpInput}
           onClick={() => setupProfile(lmpInput)}
-          className="mt-4 px-4 py-2 rounded-md bg-clinical-accent text-clinical-bg font-medium text-sm disabled:opacity-40"
+          className="press mt-4 px-4 py-2 rounded-full bg-module-pregnancy text-white font-medium text-sm disabled:opacity-40"
         >
           Start tracking
         </button>
@@ -68,15 +94,14 @@ export default function PregnancyModule() {
   }
 
   const week = gestationalAgeFromLMP(profile.lmpDate!);
-  const weekData = getWeekData(week);
-  const trimester = week < 13 ? 1 : week < 28 ? 2 : 3;
+  const trimester = (week < 13 ? 1 : week < 28 ? 2 : 3) as 1 | 2 | 3;
 
   return (
     <div className="space-y-5">
       <div className="flex gap-2 overflow-x-auto pb-1">
         {TABS.map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`text-sm px-3 py-1.5 rounded-md whitespace-nowrap border ${tab === t ? 'bg-clinical-accent/15 text-clinical-accent border-clinical-accent/30' : 'bg-clinical-panel2 border-clinical-border text-clinical-muted'}`}>
+            className={`press text-sm px-3 py-1.5 rounded-full whitespace-nowrap border ${tab === t ? 'bg-module-pregnancyBg text-module-pregnancy border-module-pregnancy/30' : 'bg-white border-cream-border text-ink-muted'}`}>
             {t}
           </button>
         ))}
@@ -84,12 +109,12 @@ export default function PregnancyModule() {
 
       {tab === 'Overview' && (
         <div className="space-y-4">
-          <div className="card p-5">
-            <p className="text-xs text-clinical-muted">Week {week} · Trimester {trimester}</p>
-            <p className="text-2xl font-display font-semibold mt-1">About the size of {weekData.sizeComparison}</p>
-            {weekData.milestone && <p className="text-sm text-clinical-teal mt-2">✦ {weekData.milestone}</p>}
-            <p className="text-xs text-clinical-muted mt-3">Estimated due date: {profile.dueDate}</p>
-          </div>
+          <p className="text-sm text-ink-muted italic">{pickEncouragement(trimester)}</p>
+
+          <GrowthSlider currentWeek={week} />
+
+          <MilestoneCard week={week} userId={user.id} dueDate={profile.dueDate} trimester={trimester} />
+
           <KickCounter userId={user.id} />
         </div>
       )}
@@ -154,7 +179,7 @@ export default function PregnancyModule() {
               onSelect={(h: HospitalResult) => setProfile({ ...profile, preferredDeliveryFacility: h })}
             />
             {profile.preferredDeliveryFacility && (
-              <p className="text-sm text-clinical-teal mt-3">Saved: {profile.preferredDeliveryFacility.name}</p>
+              <p className="text-sm text-module-pregnancy mt-3 confirm-pulse">✓ Saved: {profile.preferredDeliveryFacility.name}</p>
             )}
           </div>
           <div className="card p-4">
@@ -178,6 +203,37 @@ export default function PregnancyModule() {
           <TriageForm module="pregnancy" />
         </div>
       )}
+    </div>
+  );
+}
+
+// Trimester/due-date summary + one-time milestone glow (spec item 7).
+// Tracked via localStorage keyed by userId + week so it fires once, not on
+// every visit, even across reloads.
+function MilestoneCard({ week, userId, dueDate, trimester }: { week: number; userId: string; dueDate: string; trimester: 1 | 2 | 3 }) {
+  const hitMilestone = MILESTONE_WEEKS.includes(week);
+  const [showGlow, setShowGlow] = useState(false);
+
+  useEffect(() => {
+    if (!hitMilestone) return;
+    const seenKey = `ea_milestone_seen:${userId}:${week}`;
+    if (localStorage.getItem(seenKey)) return;
+    localStorage.setItem(seenKey, '1');
+    setShowGlow(true);
+    const t = setTimeout(() => setShowGlow(false), 2200);
+    return () => clearTimeout(t);
+  }, [hitMilestone, userId, week]);
+
+  const milestoneLabel =
+    week === 12 ? 'End of first trimester ✦' :
+    week === 24 ? 'Viability milestone ✦' :
+    week === 37 ? 'Considered early term ✦' : null;
+
+  return (
+    <div className={`card card-pregnancy p-5 ${showGlow ? 'milestone-glow' : ''}`}>
+      <p className="text-xs text-ink-muted">Week {week} · Trimester {trimester}</p>
+      <p className="text-xs text-ink-soft mt-1">Estimated due date: {dueDate}</p>
+      {milestoneLabel && <p className="text-sm text-module-pregnancy font-medium mt-2">{milestoneLabel}</p>}
     </div>
   );
 }
@@ -215,7 +271,7 @@ function VitalsLog({ profile, onUpdate }: { profile: PregnancyProfile; onUpdate:
         <label className="text-xs text-clinical-muted">Glucose (mg/dL)
           <input value={glucose} onChange={(e) => setGlucose(e.target.value)} type="number" className="w-full mt-1 bg-clinical-panel2 border border-clinical-border rounded-md p-2 text-sm" />
         </label>
-        <button type="submit" className="col-span-3 px-4 py-2 rounded-md bg-clinical-accent text-clinical-bg font-medium text-sm">Log reading</button>
+        <button type="submit" className="press col-span-3 px-4 py-2 rounded-full bg-module-pregnancy text-white font-medium text-sm">Log reading</button>
       </form>
 
       {highBP && (
