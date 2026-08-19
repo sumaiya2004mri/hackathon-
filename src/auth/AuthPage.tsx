@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 export default function AuthPage() {
   const { loginWithEmail, signupWithEmail, loginWithGoogle, updateProfile, user } = useAuth();
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const navigate = useNavigate();
   const [mode, setMode] = useState<'login' | 'signup'>('login');
   const [email, setEmail] = useState('');
@@ -37,11 +37,14 @@ export default function AuthPage() {
       {/* Brand Logo & Header */}
       <div className="flex flex-col items-center text-center space-y-2">
         <div className="w-16 h-16 rounded-full bg-pink-100/80 border border-pink-200 p-2 shadow-sm flex items-center justify-center">
-          <img src="/logo.png" alt="Emergency AI Logo" className="w-full h-full object-contain rounded-full" />
+          <img src="/logo.png" alt="Quick_care Logo" className="w-full h-full object-contain rounded-full" />
         </div>
-        <h1 className="font-display text-2xl font-extrabold text-slate-900">
-          {mode === 'login' ? 'Log in to Emergency AI' : 'Create an Account'}
+        <h1 className="font-heading text-3xl font-extrabold text-slate-900 tracking-wide">
+          {mode === 'login' ? 'Log in to Quick_care' : 'Create Quick_care Account'}
         </h1>
+        <p className="font-subheading text-xs text-[#E85A91] font-bold uppercase tracking-wider">
+          Care that reaches you first.
+        </p>
         <p className="text-xs text-slate-600 font-medium leading-relaxed">
           {user.isGuest
             ? 'Emergency triage works instantly without login. Sign in to sync period, pregnancy & health records.'

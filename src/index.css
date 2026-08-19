@@ -1,4 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,400..800;1,400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Hind+Siliguri:wght@300;400;500;600&family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300..700;1,300..700&display=swap');
+
+/* Font Declarations for Poderosa & Kiona with fallback font cascades */
+@font-face {
+  font-family: 'Poderosa';
+  src: local('Poderosa'), local('Poderosa-Regular');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Kiona';
+  src: local('Kiona'), local('Kiona-Regular'), local('Kiona-Bold');
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -10,20 +23,21 @@
 
 html {
   font-size: 16px;
-  font-family: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+  font-family: 'Cinzel', 'Plus Jakarta Sans', 'Hind Siliguri', serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, -apple-system, sans-serif;
+  font-family: 'Cinzel', 'Plus Jakarta Sans', 'Hind Siliguri', serif;
   background-color: #FFF5F8;
   color: #0F172A;
-  font-size: 1rem;
+  font-size: 0.98rem;
   line-height: 1.6;
+  font-weight: 400; /* Lighter font weight */
   background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(232, 90, 145, 0.09), transparent),
-    radial-gradient(1000px 500px at 110% 10%, rgba(247, 215, 228, 0.45), transparent),
+    radial-gradient(1200px 600px at 10% -10%, rgba(232, 90, 145, 0.08), transparent),
+    radial-gradient(1000px 500px at 110% 10%, rgba(247, 215, 228, 0.4), transparent),
     #FFF5F8;
 }
 
@@ -32,21 +46,24 @@ body {
   color: #0F172A;
 }
 
-/* Primary Brand & Hero Headings: Outfit */
-h1, .font-display {
-  font-family: 'Outfit', 'Plus Jakarta Sans', 'Hind Siliguri', sans-serif;
-  letter-spacing: -0.02em;
+/* 1. Headings: Poderosa */
+h1, .font-heading, .font-display, .app-title {
+  font-family: 'Poderosa', 'Outfit', 'Cinzel', serif !important;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
-/* Section Titles & Subheadings: Plus Jakarta Sans */
-h2, h3, h4, .font-heading, .font-subheading {
-  font-family: 'Plus Jakarta Sans', 'Outfit', 'Hind Siliguri', sans-serif;
-  letter-spacing: -0.015em;
+/* 2. Subheadings: Kiona */
+h2, h3, h4, .font-subheading, .font-nav, .card-title {
+  font-family: 'Kiona', 'Plus Jakarta Sans', sans-serif !important;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
-/* Interactive Elements, Inputs, Buttons, & Nav */
-nav, button, input, select, textarea {
-  font-family: 'Plus Jakarta Sans', 'Hind Siliguri', system-ui, sans-serif;
+/* 3. Contents & Body: Cinzel */
+p, span, label, input, select, textarea, button, td, th, li, .font-content, .font-body {
+  font-family: 'Cinzel', 'Plus Jakarta Sans', 'Hind Siliguri', serif;
 }
 
 .severity-EMERGENCY { color: #E11D48; }

@@ -12,7 +12,7 @@ export default {
           blush: '#FFF5F8',      // Very pale blush background
           card: '#FFFFFF',       // Card background
           border: '#FCE7F3',     // Soft pink border
-          text: '#0F172A',       // Dark slate text (high contrast)
+          text: '#0F172A',       // Dark slate text
           muted: '#475569',      // Slate-600 muted text
         },
         clinical: {
@@ -48,11 +48,12 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Outfit"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
-        heading: ['"Outfit"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
-        subheading: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
-        body: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
-        sans: ['"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
+        heading: ['"Poderosa"', '"Outfit"', '"Cinzel"', 'serif'],
+        display: ['"Poderosa"', '"Outfit"', '"Cinzel"', 'serif'],
+        subheading: ['"Kiona"', '"Plus Jakarta Sans"', 'sans-serif'],
+        content: ['"Cinzel"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'serif'],
+        body: ['"Cinzel"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'serif'],
+        sans: ['"Cinzel"', '"Plus Jakarta Sans"', '"Hind Siliguri"', 'sans-serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       }
     },
