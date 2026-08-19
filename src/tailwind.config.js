@@ -6,22 +6,22 @@ export default {
     extend: {
       colors: {
         maternal: {
-          primary: '#E85A91',    // Rose pink primary
+          primary: '#E85A91',    // Vibrant Rose Pink
           hover: '#D4437B',      // Darker rose hover
           soft: '#F7D7E4',       // Soft pink
           blush: '#FFF5F8',      // Very pale blush background
           card: '#FFFFFF',       // Card background
           border: '#FCE7F3',     // Soft pink border
-          text: '#26324A',       // Dark text
-          muted: '#667085',      // Muted text
+          text: '#0F172A',       // Dark slate text (high contrast)
+          muted: '#475569',      // Slate-600 muted text
         },
         clinical: {
           bg: '#FFF5F8',       // Soft blush background
           panel: '#FFFFFF',    // White card background
-          panel2: '#FFF0F5',   // Secondary panel background (blush)
-          border: '#FCE7F3',   // Border color (soft pink)
-          text: '#26324A',     // Text color
-          muted: '#667085',    // Muted text
+          panel2: '#FFF0F5',   // Secondary panel background
+          border: '#FCE7F3',   // Border color
+          text: '#0F172A',     // High contrast dark text
+          muted: '#475569',    // High contrast muted text
           accent: '#E85A91',   // Rose accent
           teal: '#0D9488',
         },
@@ -48,8 +48,8 @@ export default {
         }
       },
       fontFamily: {
-        display: ['"Fraunces"', 'Georgia', 'serif'],
-        body: ['"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"Playfair Display"', 'Georgia', 'serif'],
+        body: ['"Playfair Display"', 'Georgia', 'serif'],
         mono: ['"IBM Plex Mono"', 'monospace'],
       }
     },

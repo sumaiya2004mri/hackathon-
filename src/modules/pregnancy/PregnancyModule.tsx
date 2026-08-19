@@ -115,10 +115,10 @@ export default function PregnancyModule() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`text-xs px-3.5 py-2 rounded-full font-semibold whitespace-nowrap transition-all duration-200 ${
+              className={`text-xs px-4 py-2 rounded-full font-bold whitespace-nowrap transition-all duration-200 ${
                 tab === t
-                  ? 'bg-maternal-primary text-white shadow-xs'
-                  : 'bg-maternal-blush text-maternal-muted hover:text-maternal-text hover:bg-pink-100'
+                  ? 'bg-[#E85A91] text-white shadow-md'
+                  : 'bg-white border border-pink-200 text-slate-900 hover:text-[#E85A91] hover:bg-pink-50 font-bold'
               }`}
             >
               {t}
