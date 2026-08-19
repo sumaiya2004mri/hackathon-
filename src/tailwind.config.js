@@ -16,9 +16,9 @@ export default {
           teal: '#0D9488',     // Pregnancy teal
         },
         pregnancy: {
-          accent: '#0D9488',
-          bg: '#F0FDFA',
-          border: '#CCFBF1',
+          accent: '#E11D48',
+          bg: '#FFF1F2',
+          border: '#FFE4E6',
         },
         period: {
           accent: '#DB2777',

@@ -7,8 +7,6 @@ interface GrowthGlyphProps {
   onPrev: () => void;
 }
 
-const MILESTONES = [12, 18, 24, 28, 37, 40];
-
 export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -83,19 +81,19 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="relative select-none flex flex-col items-center justify-center p-6 bg-slate-950 rounded-2xl border border-teal-500/30 overflow-hidden min-h-[360px] shadow-2xl transition-all duration-300 group"
+      className="relative select-none flex flex-col items-center justify-center p-6 bg-slate-950 rounded-2xl border border-rose-500/30 overflow-hidden min-h-[360px] shadow-2xl transition-all duration-300 group"
       style={{
         perspective: '1000px',
       }}
     >
-      {/* Background ambient lighting and fluid glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-teal-900/30 via-slate-950 to-slate-950 pointer-events-none" />
+      {/* Background ambient lighting and rose fluid glow */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-rose-950/40 via-slate-950 to-slate-950 pointer-events-none" />
 
       {/* Floating 3D particles in amniotic sac */}
       <div className="absolute inset-0 opacity-40 pointer-events-none overflow-hidden">
-        <div className="absolute w-2 h-2 rounded-full bg-teal-400/40 animate-ping top-1/4 left-1/4" />
-        <div className="absolute w-1.5 h-1.5 rounded-full bg-cyan-300/50 top-2/3 right-1/3 animate-bounce" />
-        <div className="absolute w-1 h-1 rounded-full bg-teal-200/60 bottom-1/4 left-1/3 animate-pulse" />
+        <div className="absolute w-2 h-2 rounded-full bg-rose-400/40 animate-ping top-1/4 left-1/4" />
+        <div className="absolute w-1.5 h-1.5 rounded-full bg-pink-300/50 top-2/3 right-1/3 animate-bounce" />
+        <div className="absolute w-1 h-1 rounded-full bg-rose-200/60 bottom-1/4 left-1/3 animate-pulse" />
       </div>
 
       {/* 3D Glassmorphic Fetal Capsule Container */}
@@ -108,7 +106,7 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
       >
         {/* Glowing Heartbeat Ring */}
         <div
-          className={`absolute rounded-full border border-teal-400/30 transition-all duration-500 ${
+          className={`absolute rounded-full border border-rose-400/40 transition-all duration-500 ${
             heartbeatActive ? 'animate-ping opacity-40' : 'opacity-0'
           }`}
           style={{
@@ -119,7 +117,7 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
 
         {/* Translucent Fetal Glass Capsule */}
         <div
-          className="relative rounded-full overflow-hidden border border-white/20 shadow-[0_0_50px_rgba(13,148,136,0.35)] backdrop-blur-md bg-gradient-to-b from-white/10 via-teal-950/20 to-black/60 transition-transform duration-500 cursor-pointer"
+          className="relative rounded-full overflow-hidden border border-white/20 shadow-[0_0_50px_rgba(225,29,72,0.35)] backdrop-blur-md bg-gradient-to-b from-white/10 via-rose-950/30 to-black/60 transition-transform duration-500 cursor-pointer"
           style={{
             width: `${210 * embryoScale}px`,
             height: `${270 * embryoScale}px`,
@@ -130,7 +128,7 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
           }}
         >
           {/* Glass light reflection highlights */}
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-teal-300/20 pointer-events-none z-20" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-rose-300/20 pointer-events-none z-20" />
 
           {/* Photorealistic 3D Translucent Glass Fetus */}
           <img
@@ -147,7 +145,7 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
               triggerHeartbeat();
               setActiveHotspot(activeHotspot === 'heart' ? null : 'heart');
             }}
-            className="absolute top-[42%] left-[45%] z-30 w-4 h-4 rounded-full bg-teal-400/80 border border-white animate-pulse shadow-[0_0_12px_#0d9488]"
+            className="absolute top-[42%] left-[45%] z-30 w-4 h-4 rounded-full bg-rose-500/90 border border-white animate-pulse shadow-[0_0_12px_#e11d48]"
           />
 
           <button
@@ -156,7 +154,7 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
               e.stopPropagation();
               setActiveHotspot(activeHotspot === 'brain' ? null : 'brain');
             }}
-            className="absolute top-[22%] left-[52%] z-30 w-4 h-4 rounded-full bg-cyan-400/80 border border-white animate-pulse shadow-[0_0_12px_#06b6d4]"
+            className="absolute top-[22%] left-[52%] z-30 w-4 h-4 rounded-full bg-pink-400/90 border border-white animate-pulse shadow-[0_0_12px_#f472b6]"
           />
 
           <button
@@ -165,14 +163,14 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
               e.stopPropagation();
               setActiveHotspot(activeHotspot === 'cord' ? null : 'cord');
             }}
-            className="absolute top-[60%] left-[32%] z-30 w-4 h-4 rounded-full bg-pink-400/80 border border-white animate-pulse shadow-[0_0_12px_#ec4899]"
+            className="absolute top-[60%] left-[32%] z-30 w-4 h-4 rounded-full bg-rose-400/90 border border-white animate-pulse shadow-[0_0_12px_#fb7185]"
           />
         </div>
       </div>
 
       {/* Interactive Tooltip Card Overlay for Hotspots */}
       {activeHotspot && (
-        <div className="absolute top-4 z-40 bg-slate-900/90 border border-teal-500/40 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs text-slate-200 shadow-xl max-w-[240px] text-center animate-fade-in">
+        <div className="absolute top-4 z-40 bg-slate-900/95 border border-rose-500/40 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs text-slate-200 shadow-xl max-w-[240px] text-center animate-fade-in">
           {activeHotspot === 'heart' && '❤️ Fetal Heartbeat: Rates average 120–160 BPM.'}
           {activeHotspot === 'brain' && '🧠 Brain & Nervous System: Millions of neural connections forming.'}
           {activeHotspot === 'cord' && '🩸 Umbilical Cord: Delivering vital oxygen & nutrient flow.'}
@@ -184,21 +182,21 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
         <div className="flex items-center gap-2">
           <button
             onClick={onPrev}
-            className="w-7 h-7 rounded-full bg-slate-800/80 border border-slate-700 text-teal-400 flex items-center justify-center hover:bg-slate-700 transition-all text-sm"
+            className="w-7 h-7 rounded-full bg-slate-800/80 border border-slate-700 text-rose-400 flex items-center justify-center hover:bg-slate-700 transition-all text-sm"
             title="Previous Week"
           >
             ‹
           </button>
 
-          <div className="px-4 py-1 rounded-full bg-teal-950/60 border border-teal-500/30 text-center">
-            <span className="text-xs font-semibold uppercase tracking-wider text-teal-300">
+          <div className="px-4 py-1 rounded-full bg-rose-950/60 border border-rose-500/30 text-center">
+            <span className="text-xs font-semibold uppercase tracking-wider text-rose-300">
               Week {weekData.week}
             </span>
           </div>
 
           <button
             onClick={onNext}
-            className="w-7 h-7 rounded-full bg-slate-800/80 border border-slate-700 text-teal-400 flex items-center justify-center hover:bg-slate-700 transition-all text-sm"
+            className="w-7 h-7 rounded-full bg-slate-800/80 border border-slate-700 text-rose-400 flex items-center justify-center hover:bg-slate-700 transition-all text-sm"
             title="Next Week"
           >
             ›
@@ -206,7 +204,7 @@ export default function GrowthGlyph({ weekData, onNext, onPrev }: GrowthGlyphPro
         </div>
 
         <p className="text-sm font-display font-semibold text-slate-200 mt-1">
-          Size of <span className="text-teal-300">{weekData.sizeComparison}</span>
+          Size of <span className="text-rose-400 font-bold">{weekData.sizeComparison}</span>
         </p>
 
         <p className="text-[10px] text-slate-400 flex items-center gap-1.5 pt-1">

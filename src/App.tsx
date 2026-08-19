@@ -70,7 +70,7 @@ export default function App() {
               onClick={() => setIsTourOpen(true)}
               className="text-xs px-3 py-1.5 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-medium shadow-sm hover:opacity-95 transition-all flex items-center gap-1 animate-pulse"
             >
-              <span>✨ 30s Tour</span>
+              <span>✨ 30s Fetal Animation</span>
             </button>
 
             <NavLink to="/settings" className="text-xs text-clinical-muted hover:text-clinical-text px-2 py-1">
