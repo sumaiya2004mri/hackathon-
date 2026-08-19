@@ -4,38 +4,121 @@
 
 * { box-sizing: border-box; }
 
+/* Light pastel base (default theme) */
 body {
-  background:
-    radial-gradient(1200px 600px at 10% -10%, rgba(59,178,246,0.08), transparent),
-    radial-gradient(1000px 500px at 110% 10%, rgba(47,216,201,0.06), transparent),
-    #0B1220;
+  background: linear-gradient(180deg, #E8F3EE 0%, #F7F3EC 35%, #FBEFF2 100%);
+  color: #1F2A37;
 }
 
-::selection { background: rgba(59,178,246,0.3); }
+::selection { background: rgba(63,167,154,0.25); }
 
+/* ---------------------------------------------------------------------
+   Cards — shared base, module accent applied via left border utility
+   classes (see .card-pregnancy / .card-period / .card-emergency below)
+--------------------------------------------------------------------- */
+.card {
+  background: #FFFFFF;
+  border: 1px solid #EDE6D9;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(31,42,55,0.04), 0 4px 16px rgba(31,42,55,0.03);
+}
+
+.card-pregnancy { border-left: 4px solid #3FA79A; }
+.card-period { border-left: 4px solid #E8879C; }
+.card-emergency { border-left: 4px solid #EF7A62; }
+.card-neutral { border-left: 4px solid #8A93A6; }
+
+/* Stacked card vertical rhythm (spec item 6: bump gap ~4-8px over default) */
+.card-stack > * + * { margin-top: 1.25rem; }
+
+/* ---------------------------------------------------------------------
+   Micro-interactions (spec item 4)
+   Applied via .press class on buttons/pills/tappable cards.
+--------------------------------------------------------------------- */
+.press {
+  transition: transform 150ms ease;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Confirm pulse — symptom logging / period date marking (spec item 4) */
+.confirm-pulse {
+  animation: pulse-confirm 300ms ease;
+}
+
+/* ---------------------------------------------------------------------
+   Skeleton shimmer loaders (spec item 5)
+   Sweeps left-to-right, ~1.5s loop, uses module-tinted low-opacity fill
+   rather than a new gray.
+--------------------------------------------------------------------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: rgba(138,147,166,0.12);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+  background-size: 400px 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+.skeleton-pregnancy { background-color: rgba(63,167,154,0.10); }
+.skeleton-period { background-color: rgba(232,135,156,0.10); }
+.skeleton-emergency { background-color: rgba(239,122,98,0.10); }
+
+/* ---------------------------------------------------------------------
+   Milestone one-time glow (spec item 7)
+--------------------------------------------------------------------- */
+.milestone-glow {
+  animation: milestone-glow 2.2s ease;
+  border-radius: 1rem;
+}
+
+/* Severity text/bg colors — unchanged, clinical meaning, not module branding */
 .severity-EMERGENCY { color: #EF4444; }
 .severity-URGENT { color: #F59E0B; }
-.severity-MONITOR { color: #EAB308; }
-.severity-NORMAL { color: #22C55E; }
-
+.severity-MONITOR { color: #B45309; }
+.severity-NORMAL { color: #15803D; }
 .bg-severity-EMERGENCY { background-color: #EF4444; }
 .bg-severity-URGENT { background-color: #F59E0B; }
 .bg-severity-MONITOR { background-color: #EAB308; }
 .bg-severity-NORMAL { background-color: #22C55E; }
 
-.card {
-  background: #121B2E;
-  border: 1px solid #22304A;
-  border-radius: 0.75rem;
-}
-
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
-  70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
-  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+  0% { box-shadow: 0 0 0 0 rgba(239,122,98,0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(239,122,98,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,122,98,0); }
 }
 .pulse-emergency { animation: pulse-ring 2s infinite; }
 
+/* ---------------------------------------------------------------------
+   Baby growth animation (spec item 3) — cross-fade + scale transition
+   driven by week-number state; no jump cuts between stages.
+--------------------------------------------------------------------- */
+.growth-stage {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+.growth-stage-enter {
+  transform: scale(0.85);
+  opacity: 0;
+}
+.growth-stage-active {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* ---------------------------------------------------------------------
+   Reduced motion — every animation above gets a no-motion fallback here
+--------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
-  .pulse-emergency { animation: none; }
+  .press, .press:active { transition: none; transform: none; }
+  .confirm-pulse, .milestone-glow, .pulse-emergency { animation: none; }
+  .skeleton::after { animation: none; }
+  .growth-stage { transition: opacity 0.15s linear; }
+  .growth-stage-enter { transform: none; }
+  * { scroll-behavior: auto !important; }
 }
